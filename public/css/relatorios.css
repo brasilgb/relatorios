@@ -1,0 +1,77 @@
+@page {
+    margin: 0cm !important;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #eee;
+}
+
+.container {
+    padding: 0.5cm;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100% !important;
+    overflow: hidden;
+}
+
+/*-----------HEADER------------*/
+table.header {
+    text-align: center;
+    margin-bottom: 20px;
+    border: none;
+}
+
+table.header .image {
+    text-align: center;
+    border: none;
+}
+
+table.header .image img {
+    width: 200px;
+}
+
+table.header .title {
+    text-align: center;
+    font-size: 1.0032rem;
+    color: #555;
+    text-transform: uppercase;
+    border: none;
+    font-weight: bold;
+}
+
+table.header .subtitle {
+    font-size: 1.0032rem;
+    color: #222;
+    text-align: center;
+    border: none;
+    font-weight: bold;
+}
+
+/**-------OUTRAS TABELAS-------------- */
+table.total {
+    text-align: center;
+    margin-bottom: 20px;
+    border: none;
+}
+
+table.total th {
+    background-color: #EC6902;
+    font-size: 0.8rem;
+    color: #000;
+    text-transform: uppercase;
+    border: 1px solid #fff;
+    font-weight: bold;
+    padding: 5px;
+}
+
+table.total td {
+    font-size: 0.8rem;
+    color: #222;
+    border: 1px solid #ddd;
+    font-weight: bold;
+    padding: 5px;
+}
