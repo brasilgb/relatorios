@@ -27,6 +27,10 @@ use App\Models\RelPerfAssocVenLojas;
 use App\Models\RelPerfMesVenLojas;
 use App\Models\RelTotFatLojas;
 use App\Models\RelTotPerfVenLojas;
+use App\Models\LGERAnaliseFiliais;
+use App\Models\LGERConversaoFiliais;
+use App\Models\LGERGiroEstoque;
+use App\Models\LGERInadimplencia;
 use App\Models\Total;
 use App\Models\User;
 use Carbon\Carbon;
@@ -42,7 +46,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $this->analiseCreditoLojas();
+        $this->relRegional();
         return View('home.index');
     }
 
@@ -918,16 +922,141 @@ class HomeController extends Controller
         LAcredProjecaoTotal::where('uid', '>', 0)->delete();
         LAcredProjecaoTotal::insert($proj);
     }
+    public function relRegional()
+    {
+        $LGERAnaliseFiliais = file_get_contents('/home/anderson/Documentos/json graficos tablet/analise_de_filiais.json');
+        $DLGERAnaliseFiliais = json_decode($LGERAnaliseFiliais);
+
+        $LGERInadimplencia = file_get_contents('/home/anderson/Documentos/json graficos tablet/analise-de-filiais-inadimplencia.json');
+        $DLGERInadimplencia = json_decode($LGERInadimplencia);
+
+        $LGERConversaoFiliais = file_get_contents('/home/anderson/Documentos/json graficos tablet/melhor-conversao-filiais.json');
+        $DLGERConversaoFiliais = json_decode($LGERConversaoFiliais);
+
+        $LGERGiroEstoque = file_get_contents('/home/anderson/Documentos/json graficos tablet/giro-estoque.json');
+        $DLGERGiroEstoque = json_decode($LGERGiroEstoque);
+
+
+        //dd($DLGERGiroEstoque);
+
+        // Giro Estoque
+        foreach($DLGERGiroEstoque as $ge) {
+            $gest[] = [
+                'Atualizacao' => $ge->Atualizacao,
+                'GiroAno' => $ge->GiroAno,
+                'Cod_Filial' => $ge->Cod_Filial,
+                'Filial' => $ge->Filial,
+                'GiroEstoqueLoja' => $ge->GiroEstoqueLoja,
+                'GiroEstoqueRede' => $ge->GiroEstoqueRede
+            ];
+        }
+        LGERGiroEstoque::where('uid', '>', 0)->delete();
+        LGERGiroEstoque::insert($gest);
+        //################################################################################################################################
+
+        // Melhor Conversão de filiais
+        foreach($DLGERConversaoFiliais as $cf) {
+            $mcfil[] = [
+                'Atualizacao' => $cf->Atualizacao,
+                'RotuloFaturado' => $cf->RotuloFaturado,
+                'MelhorFaturado' => $cf->MelhorFaturado,
+                'ValorMeta' => $cf->ValorMeta,
+                'MetaAlcancada' => $cf->MetaAlcancada,
+                'RotuloMelhorPP' => $cf->RotuloMelhorPP,
+                'ValorMelhorPP' => $cf->ValorMelhorPP,
+                'MediaMelhorPP' => $cf->MediaMelhorPP,
+                'RotuloMelhorGE' => $cf->RotuloMelhorGE,
+                'ValorMelhorGE' => $cf->ValorMelhorGE,
+                'MediaMelhorGE' => $cf->MediaMelhorGE,
+                'RotuloMelhorAP' => $cf->RotuloMelhorAP,
+                'ValorMelhorAP' => $cf->ValorMelhorAP,
+                'MediaMelhorAP' => $cf->MediaMelhorAP,
+                'RotuloMelhorEP' => $cf->RotuloMelhorEP,
+                'ValorMelhorEP' => $cf->ValorMelhorEP,
+                'MediaMelhorEP' => $cf->MediaMelhorEP,
+                'RotuloMelhorVenda' => $cf->RotuloMelhorVenda,
+                'ValorMelhorVenda' => $cf->ValorMelhorVenda,
+                'MediaMelhorVenda' => $cf->MediaMelhorVenda,
+                'RotuloTaxaJuros' => $cf->RotuloTaxaJuros,
+                'ValorTaxaJuros' => $cf->ValorTaxaJuros,
+                'MediaTaxaJuros' => $cf->MediaTaxaJuros,
+                'RotuloProjecao' => $cf->RotuloProjecao,
+                'ValorProjecao' => $cf->ValorProjecao,
+                'MediaProjecao' => $cf->MediaProjecao,
+                'RotuloMetaDia' => $cf->RotuloMetaDia,
+                'MetaAlcancadaDia' => $cf->MetaAlcancadaDia,
+                'MediaMetaDia' => $cf->MediaMetaDia
+            ];
+        }
+        LGERConversaoFiliais::where('uid', '>', 0)->delete();
+        LGERConversaoFiliais::insert($mcfil);
+        //################################################################################################################################
+
+        // Analise de inadimplencia
+        foreach ($DLGERInadimplencia as $in) {
+            $inad[] = [
+                'Atualizacao' => $in->Atualizacao,
+                'Cod_Filial' => $in->Cod_Filial,
+                'PercentInadimplencia' => $in->PercentInadimplencia
+            ];
+        }
+        LGERInadimplencia::where('uid', '>', 0)->delete();
+        LGERInadimplencia::insert($inad);
+        //################################################################################################################################
+
+        // Analise de Filiais
+        foreach ($DLGERAnaliseFiliais as $af) {
+            $afil[] = [
+                'Atualizacao' => $af->Atualizacao,
+                'Cod_Filial' => $af->Cod_Filial,
+                'Filial' => $af->Filial,
+                'Valor_Faturado' => $af->Valor_Faturado,
+                'Valor_Meta' => $af->Valor_Meta,
+                'Meta_Vendas' => $af->Meta_Vendas,
+                'Margem' => $af->Margem,
+                'ValorGE' => $af->ValorGE,
+                'MetaGE' => $af->MetaGE,
+                'ElegiveisGE' => $af->ElegiveisGE,
+                'VendasGE' => $af->VendasGE,
+                'Meta_GE_Atingida' => $af->Meta_GE_Atingida,
+                'GE_Convertida' => $af->GE_Convertida,
+                'ValorPP' => $af->ValorPP,
+                'MetaPP' => $af->MetaPP,
+                'ElegiveisPP' => $af->ElegiveisPP,
+                'VendasPP' => $af->VendasPP,
+                'Meta_PP_Atingida' => $af->Meta_PP_Atingida,
+                'PP_Convertida' => $af->PP_Convertida,
+                'ValorAP' => $af->ValorAP,
+                'MetaAP' => $af->MetaAP,
+                'VendasAP' => $af->VendasAP,
+                'Meta_AP_Atingida' => $af->Meta_AP_Atingida,
+                'ValorEP' => $af->ValorEP,
+                'MetaEP' => $af->MetaEP,
+                'Meta_EP_Atingida' => $af->Meta_EP_Atingida,
+                'TaxaJurosFilial' => $af->TaxaJurosFilial,
+                'ValorTaxaJuros' => $af->ValorTaxaJuros,
+                'ValorProjecaoVenda' => $af->ValorProjecaoVenda,
+                'PercentProjecaoVenda' => $af->PercentProjecaoVenda,
+                'ValorFaturamentoDia' => $af->ValorFaturamentoDia,
+                'ValorMetaDia' => $af->ValorMetaDia,
+                'ValorAlcancadoDia' => $af->ValorAlcancadoDia
+            ];
+        }
+        LGERAnaliseFiliais::where('uid', '>', 0)->delete();
+        LGERAnaliseFiliais::insert($afil);
+        //################################################################################################################################
+    }
+
     /**
      * Operação de insercaao de dados no DB
      */
     public function insertData()
     {
-        $this->relResumos();
-        $this->relFaturamentoLojas();
-        $this->relServicosLojas();
-        $this->relComprasLojas();
-        $this->analiseCreditoLojas();
+        // $this->relResumos();
+        // $this->relFaturamentoLojas();
+        // $this->relServicosLojas();
+        // $this->relComprasLojas();
+        // $this->analiseCreditoLojas();
     }
 
     public function messageError()
