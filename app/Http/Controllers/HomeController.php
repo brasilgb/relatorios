@@ -46,7 +46,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $this->relRegional();
+        $this->insertData();
         return View('home.index');
     }
 
@@ -924,16 +924,16 @@ class HomeController extends Controller
     }
     public function relRegional()
     {
-        $LGERAnaliseFiliais = file_get_contents('/home/anderson/Documentos/json graficos tablet/analise_de_filiais.json');
+        $LGERAnaliseFiliais = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\analise_de_filiais.json');
         $DLGERAnaliseFiliais = json_decode($LGERAnaliseFiliais);
 
-        $LGERInadimplencia = file_get_contents('/home/anderson/Documentos/json graficos tablet/analise-de-filiais-inadimplencia.json');
+        $LGERInadimplencia = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\analise-de-filiais-inadimplencia.json');
         $DLGERInadimplencia = json_decode($LGERInadimplencia);
 
-        $LGERConversaoFiliais = file_get_contents('/home/anderson/Documentos/json graficos tablet/melhor-conversao-filiais.json');
+        $LGERConversaoFiliais = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\melhor-conversao-filiais.json');
         $DLGERConversaoFiliais = json_decode($LGERConversaoFiliais);
 
-        $LGERGiroEstoque = file_get_contents('/home/anderson/Documentos/json graficos tablet/giro-estoque.json');
+        $LGERGiroEstoque = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\giro-estoque.json');
         $DLGERGiroEstoque = json_decode($LGERGiroEstoque);
 
 
@@ -944,7 +944,7 @@ class HomeController extends Controller
             $gest[] = [
                 'Atualizacao' => $ge->Atualizacao,
                 'GiroAno' => $ge->GiroAno,
-                'Cod_Filial' => $ge->Cod_Filial,
+                'CodFilial' => $ge->Cod_Filial,
                 'Filial' => $ge->Filial,
                 'GiroEstoqueLoja' => $ge->GiroEstoqueLoja,
                 'GiroEstoqueRede' => $ge->GiroEstoqueRede
@@ -996,7 +996,7 @@ class HomeController extends Controller
         foreach ($DLGERInadimplencia as $in) {
             $inad[] = [
                 'Atualizacao' => $in->Atualizacao,
-                'Cod_Filial' => $in->Cod_Filial,
+                'CodFilial' => $in->Cod_Filial,
                 'PercentInadimplencia' => $in->PercentInadimplencia
             ];
         }
@@ -1008,7 +1008,7 @@ class HomeController extends Controller
         foreach ($DLGERAnaliseFiliais as $af) {
             $afil[] = [
                 'Atualizacao' => $af->Atualizacao,
-                'Cod_Filial' => $af->Cod_Filial,
+                'CodFilial' => $af->Cod_Filial,
                 'Filial' => $af->Filial,
                 'Valor_Faturado' => $af->Valor_Faturado,
                 'Valor_Meta' => $af->Valor_Meta,
@@ -1057,6 +1057,7 @@ class HomeController extends Controller
         // $this->relServicosLojas();
         // $this->relComprasLojas();
         // $this->analiseCreditoLojas();
+        $this->relRegional();
     }
 
     public function messageError()
@@ -1209,6 +1210,30 @@ class HomeController extends Controller
         return json_encode($lprojecaot);
     }
 
+    // Rotas Gerencial
+    public function getLGERAnaliseFiliais()
+    {
+        $lkpisa = LGERAnaliseFiliais::orderByDesc('uid')->get();
+        return json_encode($lkpisa);
+    }
+
+    public function getLGERConversaoFiliais()
+    {
+        $lvencidosc = LGERConversaoFiliais::orderByDesc('uid')->get();
+        return json_encode($lvencidosc);
+    }
+
+    public function getLGERGiroEstoque()
+    {
+        $lprojecaoe = LGERGiroEstoque::orderByDesc('uid')->get();
+        return json_encode($lprojecaoe);
+    }
+
+    public function getLGERInadimplencia()
+    {
+        $lprojecaoi = LGERInadimplencia::orderByDesc('uid')->get();
+        return json_encode($lprojecaoi);
+    }
 
     // Rotas API Usuários ************************
     public function login(LoginRequest $request)
