@@ -28,11 +28,14 @@ use App\Models\RelPerfMesVenLojas;
 use App\Models\RelTotFatLojas;
 use App\Models\RelTotPerfVenLojas;
 use App\Models\LGERAnaliseFiliais;
+use App\Models\LGERAnaliseVendedores;
 use App\Models\LGERConversaoFiliais;
+use App\Models\LGERConversaoVendedores;
 use App\Models\LGERGiroEstoque;
 use App\Models\LGERInadimplencia;
 use App\Models\Total;
 use App\Models\User;
+use App\Models\UserAccess;
 use Carbon\Carbon;
 use DateTime;
 use Facade\FlareClient\View;
@@ -46,7 +49,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $this->insertData();
         return View('home.index');
     }
 
@@ -309,7 +311,6 @@ class HomeController extends Controller
         foreach ($DLRSPerf as $per) {
             $perf[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $per->Atualizacao)->format("Y-m-d H:i:s"),
-                'AnoMesNum' => $per->AnoMesNum,
                 'PerfMesAno' => $per->PerfMesAno,
                 'PerfValorGE' => $per->PerfValorGE,
                 'PerfRepGE' => $per->PerfRepGE,
@@ -922,25 +923,31 @@ class HomeController extends Controller
         LAcredProjecaoTotal::where('uid', '>', 0)->delete();
         LAcredProjecaoTotal::insert($proj);
     }
-    public function relRegional()
+    public function relGerencial()
     {
-        $LGERAnaliseFiliais = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\analise_de_filiais.json');
+        $LGERAnaliseFiliais = file_get_contents('\\\\Srv-proexpress\\json_data\\analise_de_filiais.json');
         $DLGERAnaliseFiliais = json_decode($LGERAnaliseFiliais);
 
-        $LGERInadimplencia = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\analise-de-filiais-inadimplencia.json');
+        $LGERInadimplencia = file_get_contents('\\\\Srv-proexpress\\json_data\\analise-de-filiais-inadimplencia.json');
         $DLGERInadimplencia = json_decode($LGERInadimplencia);
 
-        $LGERConversaoFiliais = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\melhor-conversao-filiais.json');
+        $LGERConversaoFiliais = file_get_contents('\\\\Srv-proexpress\\json_data\\melhor-conversao-filiais.json');
         $DLGERConversaoFiliais = json_decode($LGERConversaoFiliais);
 
-        $LGERGiroEstoque = file_get_contents('D:\\Dados Debian\Documentos\\json graficos tablet\\giro-estoque.json');
+        $LGERGiroEstoque = file_get_contents('\\\\Srv-proexpress\\json_data\\giro-estoque.json');
         $DLGERGiroEstoque = json_decode($LGERGiroEstoque);
+
+        $LGERAnaliseVendedores = file_get_contents('\\\\Srv-proexpress\\json_data\\vendas-vendedores.json');
+        $DLGERAnaliseVendedores = json_decode($LGERAnaliseVendedores);
+
+        $LGERConversaoVendedores = file_get_contents('\\\\Srv-proexpress\\json_data\\melhor-conversao-vendedores-filiais.json');
+        $DLGERConversaoVendedores = json_decode($LGERConversaoVendedores);
 
 
         //dd($DLGERGiroEstoque);
 
         // Giro Estoque
-        foreach($DLGERGiroEstoque as $ge) {
+        foreach ($DLGERGiroEstoque as $ge) {
             $gest[] = [
                 'Atualizacao' => $ge->Atualizacao,
                 'GiroAno' => $ge->GiroAno,
@@ -955,7 +962,7 @@ class HomeController extends Controller
         //################################################################################################################################
 
         // Melhor Conversão de filiais
-        foreach($DLGERConversaoFiliais as $cf) {
+        foreach ($DLGERConversaoFiliais as $cf) {
             $mcfil[] = [
                 'Atualizacao' => $cf->Atualizacao,
                 'RotuloFaturado' => $cf->RotuloFaturado,
@@ -1045,6 +1052,53 @@ class HomeController extends Controller
         LGERAnaliseFiliais::where('uid', '>', 0)->delete();
         LGERAnaliseFiliais::insert($afil);
         //################################################################################################################################
+
+        // Analise de Vendedores
+        foreach ($DLGERAnaliseVendedores as $av) {
+            $aven[] = [
+                'Atualizacao' => $av->Atualizacao,
+                'Filial' => $av->Filial,
+                'CodigoVendedor' => $av->CodigoVendedor,
+                'NomeVendedor' => $av->NomeVendedor,
+                'ValorGE' => $av->ValorGE,
+                'MetaGE' => $av->MetaGE,
+                'ValorGE' => $av->ValorGE,
+                'MetaGE' => $av->MetaGE,
+                'PercentualGE' => $av->PercentualGE,
+                'ValorPP' => $av->ValorPP,
+                'MetaPP' => $av->MetaPP,
+                'PercentualPP' => $av->PercentualPP,
+                'ValorVenda' => $av->ValorVenda,
+                'MetaVenda' => $av->MetaVenda,
+                'PercentualVenda' => $av->PercentualVenda,
+                'ValorJurosVendidos' => $av->ValorJurosVendidos,
+                'PercentJurosVendidos' => $av->PercentJurosVendidos
+            ];
+        }
+        LGERAnaliseVendedores::where('uid', '>', 0)->delete();
+        LGERAnaliseVendedores::insert($aven);
+        //################################################################################################################################
+    
+        // Analise de Vendedores
+        foreach ($DLGERConversaoVendedores as $cv) {
+            $cven[] = [
+                'Atualizacao' => $cv->Atualizacao,
+                'CodigoFilial' => $cv->CodigoFilial,
+                'DescricaoFilial' => $cv->DescricaoFilial,
+                'CodigoVendedorGE' => $cv->CodigoVendedorGE,
+                'RotuloMelhorGE' => $cv->RotuloMelhorGE,
+                'ValorMelhorGE' => $cv->ValorMelhorGE,
+                'CodigoVendedorPP' => $cv->CodigoVendedorPP,
+                'RotuloMelhorPP' => $cv->RotuloMelhorPP,
+                'ValorMelhorPP' => $cv->ValorMelhorPP,
+                'CodigoVendedorVenda' => $cv->CodigoVendedorVenda,
+                'RotuloMelhorVenda' => $cv->RotuloMelhorVenda,
+                'ValorMelhorVenda' => $cv->ValorMelhorVenda
+            ];
+        }
+        LGERConversaoVendedores::where('uid', '>', 0)->delete();
+        LGERConversaoVendedores::insert($cven);
+        //################################################################################################################################
     }
 
     /**
@@ -1052,12 +1106,12 @@ class HomeController extends Controller
      */
     public function insertData()
     {
-        // $this->relResumos();
-        // $this->relFaturamentoLojas();
-        // $this->relServicosLojas();
-        // $this->relComprasLojas();
-        // $this->analiseCreditoLojas();
-        $this->relRegional();
+        $this->relResumos();
+        $this->relFaturamentoLojas();
+        $this->relServicosLojas();
+        $this->relComprasLojas();
+        $this->analiseCreditoLojas();
+        $this->relGerencial();
     }
 
     public function messageError()
@@ -1235,6 +1289,18 @@ class HomeController extends Controller
         return json_encode($lprojecaoi);
     }
 
+    public function getLGERAnaliseVendedores()
+    {
+        $lkpisa = LGERAnaliseVendedores::orderByDesc('uid')->get();
+        return json_encode($lkpisa);
+    }
+
+    public function getLGERConversaoVendedores()
+    {
+        $lvencidosc = LGERConversaoVendedores::orderByDesc('uid')->get();
+        return json_encode($lvencidosc);
+    }
+
     // Rotas API Usuários ************************
     public function login(LoginRequest $request)
     {
@@ -1252,11 +1318,13 @@ class HomeController extends Controller
         }
 
         if ($code && $password) {
+
             $response = [
                 "sigIn" => [
                     "success" => true,
                     "message" => "Login efetuado com sucesso!",
                     "user" => [
+                        "idusuario" => $code->IdUsuario,
                         "name" => $code->Name,
                         "filial" => $code->Filial,
                         "type" => $code->Type,
@@ -1264,6 +1332,12 @@ class HomeController extends Controller
                     ]
                 ]
             ];
+            $data = [
+                "IdUsuario" => $code->IdUsuario,
+                "Name" => $code->Name,
+                "Filial" => $code->Filial
+            ];
+            UserAccess::insert($data);
         } else {
             $response = [
                 "sigIn" => [

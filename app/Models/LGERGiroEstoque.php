@@ -14,7 +14,7 @@ class LGERGiroEstoque extends Model
     protected $fillable = [
         'Atualizacao',
         'GiroAno',
-        'Cod_Filial',
+        'CodFilial',
         'Filial',
         'GiroEstoqueLoja',
         'GiroEstoqueRede'

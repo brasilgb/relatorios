@@ -13,7 +13,7 @@ class LGERAnaliseFiliais extends Model
 
     protected $fillable = [
         'Atualizacao',
-        'Cod_Filial',
+        'CodFilial',
         'Filial',
         'Valor_Faturado',
         'Valor_Meta',
