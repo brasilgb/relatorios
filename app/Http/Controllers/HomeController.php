@@ -1302,7 +1302,12 @@ class HomeController extends Controller
     }
 
     // Rotas API Usuários ************************
-    public function login(LoginRequest $request)
+    public function listUsers(){
+        $usuarios = User::get();
+        return response()->json($usuarios);
+    }
+    
+    public function login(LoginRequest $request, User $usuario)
     {
         $rcode = $request->code;
         $rpassword = $request->password;
@@ -1319,6 +1324,7 @@ class HomeController extends Controller
 
         if ($code && $password) {
 
+            $token = $usuario->createToken('auth_token');
             $response = [
                 "sigIn" => [
                     "success" => true,
@@ -1328,7 +1334,8 @@ class HomeController extends Controller
                         "name" => $code->Name,
                         "filial" => $code->Filial,
                         "type" => $code->Type,
-                        "code" => $code->Code
+                        "code" => $code->Code,
+                        "token" => $token->plainTextToken
                     ]
                 ]
             ];
