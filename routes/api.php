@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
 Route::post('/login', [HomeController::class, 'login']);
 Route::post('/register', [HomeController::class, 'register']);
 Route::get('/listusers', [HomeController::class, 'listUsers']);
+Route::get('/listusersaccess', [HomeController::class, 'listUsersAccess']);
 
 
 // Rotas API Resumos Geral

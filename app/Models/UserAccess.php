@@ -16,4 +16,9 @@ class UserAccess extends Model
         'Name',
         'Filial'
     ];
+
+    public function usuario()
+    {
+        return $this->hasOne(User::class, 'IdUsuario', 'IdUsuario');
+    }
 }

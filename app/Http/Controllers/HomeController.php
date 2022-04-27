@@ -1093,7 +1093,10 @@ class HomeController extends Controller
                 'ValorMelhorPP' => $cv->ValorMelhorPP,
                 'CodigoVendedorVenda' => $cv->CodigoVendedorVenda,
                 'RotuloMelhorVenda' => $cv->RotuloMelhorVenda,
-                'ValorMelhorVenda' => $cv->ValorMelhorVenda
+                'ValorMelhorVenda' => $cv->ValorMelhorVenda,
+                'CodigoVendedorJuro' => $cv->CodigoVendedorJuro,
+                'RotuloMelhorJuro' => $cv->RotuloMelhorJuro,
+                'ValorMelhorJuro' => $cv->ValorMelhorJuro
             ];
         }
         LGERConversaoVendedores::where('uid', '>', 0)->delete();
@@ -1306,6 +1309,11 @@ class HomeController extends Controller
         $usuarios = User::get();
         return response()->json($usuarios);
     }
+
+    public function listUsersAccess(){
+        $access = UserAccess::with('usuario')->get();
+        return response()->json($access);
+    }
     
     public function login(LoginRequest $request, User $usuario)
     {
@@ -1341,8 +1349,7 @@ class HomeController extends Controller
             ];
             $data = [
                 "IdUsuario" => $code->IdUsuario,
-                "Name" => $code->Name,
-                "Filial" => $code->Filial
+                "Ip" => $request->ip()
             ];
             UserAccess::insert($data);
         } else {
