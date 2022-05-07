@@ -9,7 +9,7 @@ class RelGrafVenLojas extends Model
 {
     use HasFactory;
 
-    protected $table = 'Lfat_grafico';
+    protected $table = 'lfat_grafico';
 
     protected $fillable = [
         'Atualizacao',

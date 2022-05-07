@@ -5,21 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LAcredKpis extends Model
+class LGERGiroSubGrupo extends Model
 {
     use HasFactory;
 
-    protected $table = "lacr_kpis";
+    protected $table = "lger_girosubgrupo";
 
     protected $fillable = [
         'Atualizacao',
         'CodFilial',
         'Filial',
-        'ValorCrediario',
-        'ValorVencer',
-        'RepVencer',
-        'ValorVencido',
-        'RepVencido',
-        'RepProjVencido'
+        'SubGrupo',
+        'CodSubGrupo',
+        'ValorEstoque',
+        'ValorAtual',
+        'GiroFilial',
+        'GiroRede'
     ];
-} 
+}

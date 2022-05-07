@@ -33,6 +33,7 @@ use App\Models\LGERConversaoFiliais;
 use App\Models\LGERConversaoVendedores;
 use App\Models\LGERGiroEstoque;
 use App\Models\LGERInadimplencia;
+use App\Models\LGERGiroSubGrupo;
 use App\Models\Total;
 use App\Models\User;
 use App\Models\UserAccess;
@@ -44,11 +45,13 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use PDF;
+use PDO;
 
 class HomeController extends Controller
 {
     public function index()
     {
+
         return View('home.index');
     }
 
@@ -922,6 +925,7 @@ class HomeController extends Controller
         }
         LAcredProjecaoTotal::where('uid', '>', 0)->delete();
         LAcredProjecaoTotal::insert($proj);
+
     }
     public function relGerencial()
     {
@@ -943,8 +947,8 @@ class HomeController extends Controller
         $LGERConversaoVendedores = file_get_contents('\\\\Srv-proexpress\\json_data\\melhor-conversao-vendedores-filiais.json');
         $DLGERConversaoVendedores = json_decode($LGERConversaoVendedores);
 
-
-        //dd($DLGERGiroEstoque);
+        $LGERGiroSubGrupo = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Giro_estoque\\giro-estoque-analise-gerencial-filial.json');
+        $DLGERGiroSubGrupo = json_decode($LGERGiroSubGrupo);
 
         // Giro Estoque
         foreach ($DLGERGiroEstoque as $ge) {
@@ -1102,6 +1106,29 @@ class HomeController extends Controller
         LGERConversaoVendedores::where('uid', '>', 0)->delete();
         LGERConversaoVendedores::insert($cven);
         //################################################################################################################################
+
+        // Giro Estoque Sub Grupo
+       foreach ($DLGERGiroSubGrupo as $gesg) {
+            $gesgst[] = [
+                'Atualizacao' => $gesg->Atualizacao,
+                'CodFilial' => $gesg->CodFilial,
+                'Filial' => $gesg->Filial,
+                'SubGrupo' => $gesg->SubGrupo,
+                'ValorEstoque' => $gesg->ValorEstoque,
+                'ValorAtual' => $gesg->ValorAtual,
+                'GiroFilial' => $gesg->GiroFilial,
+                'GiroRede' => $gesg->GiroRede,
+            ];
+        }
+        // it's the same instance.
+DB::connection()->getPdo() === (new LGERGiroSubGrupo)->getConnection()->getPdo(); // true
+DB::connection()->getPdo()->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+LGERGiroSubGrupo::where('uid', '>', 0)->delete();
+LGERGiroSubGrupo::insert($gesgst);
+DB::connection()->getPdo()->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+       
+//################################################################################################################################
+
     }
 
     /**
@@ -1234,7 +1261,7 @@ class HomeController extends Controller
     {
         $lkpis = LAcredKpis::orderByDesc('uid')->get();
         return json_encode($lkpis);
-    }
+    } 
 
     public function getLAcrGrafVencidos()
     {
@@ -1282,8 +1309,8 @@ class HomeController extends Controller
 
     public function getLGERGiroEstoque()
     {
-        $lprojecaoe = LGERGiroEstoque::orderByDesc('uid')->get();
-        return json_encode($lprojecaoe);
+        $lgiro = LGERGiroEstoque::orderByDesc('uid')->get();
+        return json_encode($lgiro);
     }
 
     public function getLGERInadimplencia()
@@ -1302,6 +1329,12 @@ class HomeController extends Controller
     {
         $lvencidosc = LGERConversaoVendedores::orderByDesc('uid')->get();
         return json_encode($lvencidosc);
+    }
+
+    public function getLGERGiroSubGrupo()
+    {
+        $lgirosubgrupo = LGERGiroSubGrupo::orderByDesc('uid')->get();
+        return json_encode($lgirosubgrupo);
     }
 
     // Rotas API Usuários ************************
