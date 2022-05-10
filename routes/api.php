@@ -63,6 +63,7 @@ Route::get('/analiseprojecaototal', [HomeController::class, 'getLAcrGrafProjecao
 Route::get('/analisefiliais', [HomeController::class, 'getLGERAnaliseFiliais']);
 Route::get('/conversaofiliais', [HomeController::class, 'getLGERConversaoFiliais']);
 Route::get('/giroestoque', [HomeController::class, 'getLGERGiroEstoque']);
+Route::get('/girosubgrupo', [HomeController::class, 'getLGERGiroSubGrupo']);
 Route::get('/inadimplencia', [HomeController::class, 'getLGERInadimplencia']);
 Route::get('/analisevendedores', [HomeController::class, 'getLGERAnaliseVendedores']);
 Route::get('/conversaovendedores', [HomeController::class, 'getLGERConversaoVendedores']);

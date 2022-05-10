@@ -120,7 +120,7 @@ class HomeController extends Controller
         if ($dataComp->count() == 0) {
             LComComparadia::insert($comp);
         } else if ($dataComp1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataComp->first()->Atualizacao)->format("Y-m-d")) {
-            LComComparadia::whereDate('Atualizacao', $dataComp1)->delete();
+            LComComparadia::whereDate('Atualizacao', $dataComp1)->truncate();
             LComComparadia::insert($comp);
         } else {
             LComComparadia::insert($comp);
@@ -143,7 +143,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             LComGrafico::insert($graf);
         } else if ($dataComp2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            LComGrafico::whereDate('Atualizacao', $dataComp2)->delete();
+            LComGrafico::whereDate('Atualizacao', $dataComp2)->truncate();
             LComGrafico::insert($graf);
         } else {
             LComGrafico::insert($graf);
@@ -168,7 +168,7 @@ class HomeController extends Controller
         if ($dataAss->count() == 0) {
             LComPerfAssoc::insert($assoc);
         } else if ($dataComp3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataAss->first()->Atualizacao)->format("Y-m-d")) {
-            LComPerfAssoc::whereDate('Atualizacao', $dataComp3)->delete();
+            LComPerfAssoc::whereDate('Atualizacao', $dataComp3)->truncate();
             LComPerfAssoc::insert($assoc);
         } else {
             LComPerfAssoc::insert($assoc);
@@ -194,7 +194,7 @@ class HomeController extends Controller
         if ($dataMes->count() == 0) {
             LComPerfMes::insert($meses);
         } else if ($dataComp4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataMes->first()->Atualizacao)->format("Y-m-d")) {
-            LComPerfMes::whereDate('Atualizacao', $dataComp4)->delete();
+            LComPerfMes::whereDate('Atualizacao', $dataComp4)->truncate();
             LComPerfMes::insert($meses);
         } else {
             LComPerfMes::insert($meses);
@@ -227,7 +227,7 @@ class HomeController extends Controller
         if ($dataTot->count() == 0) {
             LComTotais::insert($tota);
         } else if ($dataComp5 == Carbon::createFromFormat("Y-m-d H:i:s", $dataTot->first()->Atualizacao)->format("Y-m-d")) {
-            LComTotais::whereDate('Atualizacao', $dataComp5)->delete();
+            LComTotais::whereDate('Atualizacao', $dataComp5)->truncate();
             LComTotais::insert($tota);
         } else {
             LComTotais::insert($tota);
@@ -275,7 +275,7 @@ class HomeController extends Controller
         if ($dataResum->count() == 0) {
             LSerResumoDia::insert($resum);
         } else if ($dataSer1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataResum->first()->Atualizacao)->format("Y-m-d")) {
-            LSerResumoDia::whereDate('Atualizacao', $dataSer1)->delete();
+            LSerResumoDia::whereDate('Atualizacao', $dataSer1)->truncate();
             LSerResumoDia::insert($resum);
         } else {
             LSerResumoDia::insert($resum);
@@ -299,7 +299,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             LSerGrafico::insert($graf);
         } else if ($dataSer2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            LSerGrafico::whereDate('Atualizacao', $dataSer2)->delete();
+            LSerGrafico::whereDate('Atualizacao', $dataSer2)->truncate();
             LSerGrafico::insert($graf);
         } else {
             LSerGrafico::insert($graf);
@@ -332,7 +332,7 @@ class HomeController extends Controller
         if ($dataPerf->count() == 0) {
             LSerPerform::insert($perf);
         } else if ($dataSer3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerf->first()->Atualizacao)->format("Y-m-d")) {
-            LSerPerform::whereDate('Atualizacao', $dataSer3)->delete();
+            LSerPerform::whereDate('Atualizacao', $dataSer3)->truncate();
             LSerPerform::insert($perf);
         } else {
             LSerPerform::insert($perf);
@@ -413,7 +413,7 @@ class HomeController extends Controller
         if ($dataTot->count() == 0) {
             LSerTotais::insert($tota);
         } else if ($dataSer4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataTot->first()->Atualizacao)->format("Y-m-d")) {
-            LSerTotais::whereDate('Atualizacao', $dataSer4)->delete();
+            LSerTotais::whereDate('Atualizacao', $dataSer4)->truncate();
             LSerTotais::insert($tota);
         } else {
             LSerTotais::insert($tota);
@@ -468,7 +468,7 @@ class HomeController extends Controller
             RelFatuLojas::insert($fat);
         } else if ($dataFatu1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataFaturamento->first()->Atualizacao)->format("Y-m-d")) {
             //$this->messageError('filiais');
-            RelFatuLojas::whereDate('Atualizacao', $dataFatu1)->delete();
+            RelFatuLojas::whereDate('Atualizacao', $dataFatu1)->truncate();
             RelFatuLojas::insert($fat);
         } else {
             RelFatuLojas::insert($fat);
@@ -513,7 +513,7 @@ class HomeController extends Controller
         if ($dataFatTotal->count() == 0) {
             RelTotFatLojas::insert($totfat);
         } else if ($dataFatu2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataFatTotal->first()->Atualizacao)->format("Y-m-d")) {
-            RelTotFatLojas::whereDate('Atualizacao', $dataFatu2)->delete();
+            RelTotFatLojas::whereDate('Atualizacao', $dataFatu2)->truncate();
             RelTotFatLojas::insert($totfat);
         } else {
             RelTotFatLojas::insert($totfat);
@@ -538,7 +538,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             RelGrafVenLojas::insert($graf);
         } else if ($dataFatu3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            RelGrafVenLojas::whereDate('Atualizacao', $dataFatu3)->delete();
+            RelGrafVenLojas::whereDate('Atualizacao', $dataFatu3)->truncate();
             RelGrafVenLojas::insert($graf);
         } else {
             RelGrafVenLojas::insert($graf);
@@ -568,7 +568,7 @@ class HomeController extends Controller
         if ($dataPerfAssoc->count() == 0) {
             RelPerfAssocVenLojas::insert($perfassoc);
         } else if ($dataFatu4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerfAssoc->first()->Atualizacao)->format("Y-m-d")) {
-            RelPerfAssocVenLojas::whereDate('Atualizacao', $dataFatu4)->delete();
+            RelPerfAssocVenLojas::whereDate('Atualizacao', $dataFatu4)->truncate();
             RelPerfAssocVenLojas::insert($perfassoc);
         } else {
             RelPerfAssocVenLojas::insert($perfassoc);
@@ -597,7 +597,7 @@ class HomeController extends Controller
         if ($dataPerfMes->count() == 0) {
             RelPerfMesVenLojas::insert($perfmes);
         } else if ($dataFatu5 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerfMes->first()->Atualizacao)->format("Y-m-d")) {
-            RelPerfMesVenLojas::whereDate('Atualizacao', $dataFatu5)->delete();
+            RelPerfMesVenLojas::whereDate('Atualizacao', $dataFatu5)->truncate();
             RelPerfMesVenLojas::insert($perfmes);
         } else {
             RelPerfMesVenLojas::insert($perfmes);
@@ -632,7 +632,7 @@ class HomeController extends Controller
         if ($dataPerf->count() == 0) {
             RelTotPerfVenLojas::insert($perf);
         } else if ($dataFatu6 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerf->first()->Atualizacao)->format("Y-m-d")) {
-            RelTotPerfVenLojas::whereDate('Atualizacao', $dataFatu6)->delete();
+            RelTotPerfVenLojas::whereDate('Atualizacao', $dataFatu6)->truncate();
             RelTotPerfVenLojas::insert($perf);
         } else {
             RelTotPerfVenLojas::insert($perf);
@@ -702,7 +702,7 @@ class HomeController extends Controller
         if ($datacadFilial->count() == 0) {
             Filial::insert($fili);
         } else if ($dataRes1 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadFilial->first()->Atualizacao)->format("Y-m-d")) {
-            Filial::whereDate('Atualizacao', $dataRes1)->delete();
+            Filial::whereDate('Atualizacao', $dataRes1)->truncate();
             Filial::insert($fili);
         } else {
             Filial::insert($fili);
@@ -731,7 +731,7 @@ class HomeController extends Controller
             Assoc::insert($assoc);
         } else if ($dataRes2 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadAssoc->first()->Atualizacao)->format("Y-m-d")) {
 
-            Assoc::whereDate('Atualizacao', $dataRes2)->delete();
+            Assoc::whereDate('Atualizacao', $dataRes2)->truncate();
             Assoc::insert($assoc);
         } else {
             Assoc::insert($assoc);
@@ -757,7 +757,7 @@ class HomeController extends Controller
             Export::insert($export);
         } else if ($dataRes3 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadExp->first()->Atualizacao)->format("Y-m-d")) {
             //$this->messageError('exportacao');
-            Export::whereDate('Atualizacao', $dataRes3)->delete();
+            Export::whereDate('Atualizacao', $dataRes3)->truncate();
             Export::insert($export);
         } else {
             Export::insert($export);
@@ -791,7 +791,7 @@ class HomeController extends Controller
             return;
         } else if ($dataRes4 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadTot->first()->Atualizacao)->format("Y-m-d")) {
             //$this->messageError('exportacao');
-            Total::whereDate('Atualizacao', $dataRes4)->delete();
+            Total::whereDate('Atualizacao', $dataRes4)->truncate();
             Total::insert($tot);
             return;
         } else {
@@ -837,7 +837,7 @@ class HomeController extends Controller
             }
         }
         $diretorioKpi->close();
-        LAcredKpis::where('uid', '>', 0)->delete();
+        LAcredKpis::where('uid', '>', 0)->truncate();
         LAcredKpis::insert($kpi);
 
         // Kpis total
@@ -852,7 +852,7 @@ class HomeController extends Controller
                 'RepProjVencido' => $kp->RepProjVencido
             ];
         }
-        LAcredKpisTotal::where('uid', '>', 0)->delete();
+        LAcredKpisTotal::where('uid', '>', 0)->truncate();
         LAcredKpisTotal::insert($kpit);
 
         //################################################################################################################################
@@ -875,7 +875,7 @@ class HomeController extends Controller
             }
         }
         $diretorioVencimento->close();
-        LAcredVencido::where('uid', '>', 0)->delete();
+        LAcredVencido::where('uid', '>', 0)->truncate();
         LAcredVencido::insert($vencimento);
 
         // Vencimento Total
@@ -889,7 +889,7 @@ class HomeController extends Controller
                 'RepVencidos' => $vc->RepVencidos
             ];
         }
-        LAcredVencidoTotal::where('uid', '>', 0)->delete();
+        LAcredVencidoTotal::where('uid', '>', 0)->truncate();
         LAcredVencidoTotal::insert($vcit);
         //################################################################################################################################
         // Projeção vencimento filial
@@ -910,7 +910,7 @@ class HomeController extends Controller
             }
         }
         $diretorioProjecao->close();
-        LAcredProjecao::where('uid', '>', 0)->delete();
+        LAcredProjecao::where('uid', '>', 0)->truncate();
         LAcredProjecao::insert($projecao);
 
         // Projeção vencimento total
@@ -923,7 +923,7 @@ class HomeController extends Controller
                 'ProjVencidos' => $pj->ProjVencidos
             ];
         }
-        LAcredProjecaoTotal::where('uid', '>', 0)->delete();
+        LAcredProjecaoTotal::where('uid', '>', 0)->truncate();
         LAcredProjecaoTotal::insert($proj);
 
     }
@@ -961,7 +961,7 @@ class HomeController extends Controller
                 'GiroEstoqueRede' => $ge->GiroEstoqueRede
             ];
         }
-        LGERGiroEstoque::where('uid', '>', 0)->delete();
+        LGERGiroEstoque::where('uid', '>', 0)->truncate();
         LGERGiroEstoque::insert($gest);
         //################################################################################################################################
 
@@ -999,7 +999,7 @@ class HomeController extends Controller
                 'MediaMetaDia' => $cf->MediaMetaDia
             ];
         }
-        LGERConversaoFiliais::where('uid', '>', 0)->delete();
+        LGERConversaoFiliais::where('uid', '>', 0)->truncate();
         LGERConversaoFiliais::insert($mcfil);
         //################################################################################################################################
 
@@ -1011,7 +1011,7 @@ class HomeController extends Controller
                 'PercentInadimplencia' => $in->PercentInadimplencia
             ];
         }
-        LGERInadimplencia::where('uid', '>', 0)->delete();
+        LGERInadimplencia::where('uid', '>', 0)->truncate();
         LGERInadimplencia::insert($inad);
         //################################################################################################################################
 
@@ -1053,7 +1053,7 @@ class HomeController extends Controller
                 'ValorAlcancadoDia' => $af->ValorAlcancadoDia
             ];
         }
-        LGERAnaliseFiliais::where('uid', '>', 0)->delete();
+        LGERAnaliseFiliais::where('uid', '>', 0)->truncate();
         LGERAnaliseFiliais::insert($afil);
         //################################################################################################################################
 
@@ -1079,7 +1079,7 @@ class HomeController extends Controller
                 'PercentJurosVendidos' => $av->PercentJurosVendidos
             ];
         }
-        LGERAnaliseVendedores::where('uid', '>', 0)->delete();
+        LGERAnaliseVendedores::where('uid', '>', 0)->truncate();
         LGERAnaliseVendedores::insert($aven);
         //################################################################################################################################
     
@@ -1103,30 +1103,31 @@ class HomeController extends Controller
                 'ValorMelhorJuro' => $cv->ValorMelhorJuro
             ];
         }
-        LGERConversaoVendedores::where('uid', '>', 0)->delete();
+        LGERConversaoVendedores::where('uid', '>', 0)->truncate();
         LGERConversaoVendedores::insert($cven);
         //################################################################################################################################
 
         // Giro Estoque Sub Grupo
        foreach ($DLGERGiroSubGrupo as $gesg) {
-            $gesgst[] = [
+            $gesgst = [
                 'Atualizacao' => $gesg->Atualizacao,
                 'CodFilial' => $gesg->CodFilial,
                 'Filial' => $gesg->Filial,
+                'CodSubGrupo' => $gesg->CodSubGrupo,
                 'SubGrupo' => $gesg->SubGrupo,
                 'ValorEstoque' => $gesg->ValorEstoque,
                 'ValorAtual' => $gesg->ValorAtual,
                 'GiroFilial' => $gesg->GiroFilial,
                 'GiroRede' => $gesg->GiroRede,
             ];
+            $insert_giro[] = $gesgst;
         }
-        // it's the same instance.
-DB::connection()->getPdo() === (new LGERGiroSubGrupo)->getConnection()->getPdo(); // true
-DB::connection()->getPdo()->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-LGERGiroSubGrupo::where('uid', '>', 0)->delete();
-LGERGiroSubGrupo::insert($gesgst);
-DB::connection()->getPdo()->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-       
+        $insert_giro = collect($insert_giro);
+        $chunks = $insert_giro->chunk(1000);
+        LGERGiroSubGrupo::where('uid', '>', 0)->truncate();
+        foreach($chunks as $chunk){
+        LGERGiroSubGrupo::insert($chunk->toArray());  
+        }       
 //################################################################################################################################
 
     }
@@ -1331,8 +1332,23 @@ DB::connection()->getPdo()->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         return json_encode($lvencidosc);
     }
 
-    public function getLGERGiroSubGrupo()
+    public function getLGERGiroSubGrupo(Request $request)
     {
+        // $filial = $request->filial;
+        // $subgrupo = $request->subgrupo;
+        // $giro = $request->giro;
+        // $lgirosubgrupo = LGERGiroSubGrupo::query()
+        // ->when($filial, function($query){
+        //     $query->where('Filial', $filial)
+        // })
+        // ->when($filial, function($query){
+        //     $query->where('Filial', $filial)
+        // })
+        // ->when($filial, function($query){
+        //     $query->where('Filial', $filial)
+        // })
+        // ->get()
+
         $lgirosubgrupo = LGERGiroSubGrupo::orderByDesc('uid')->get();
         return json_encode($lgirosubgrupo);
     }
