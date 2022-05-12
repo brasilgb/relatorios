@@ -1126,7 +1126,7 @@ class HomeController extends Controller
         $chunks = $insert_giro->chunk(1000);
         LGERGiroSubGrupo::where('uid', '>', 0)->truncate();
         foreach($chunks as $chunk){
-        LGERGiroSubGrupo::insert($chunk->toArray());  
+        LGERGiroSubGrupo::insert($chunk->toArray());
         }       
 //################################################################################################################################
 
