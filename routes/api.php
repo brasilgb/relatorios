@@ -67,3 +67,4 @@ Route::get('/girosubgrupo', [HomeController::class, 'getLGERGiroSubGrupo']);
 Route::get('/inadimplencia', [HomeController::class, 'getLGERInadimplencia']);
 Route::get('/analisevendedores', [HomeController::class, 'getLGERAnaliseVendedores']);
 Route::get('/conversaovendedores', [HomeController::class, 'getLGERConversaoVendedores']);
+Route::get('/margemvendedor', [HomeController::class, 'getLGERMargemVendedor']);

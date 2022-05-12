@@ -34,6 +34,7 @@ use App\Models\LGERConversaoVendedores;
 use App\Models\LGERGiroEstoque;
 use App\Models\LGERInadimplencia;
 use App\Models\LGERGiroSubGrupo;
+use App\Models\LGERMargemVendedor;
 use App\Models\Total;
 use App\Models\User;
 use App\Models\UserAccess;
@@ -925,7 +926,6 @@ class HomeController extends Controller
         }
         LAcredProjecaoTotal::where('uid', '>', 0)->truncate();
         LAcredProjecaoTotal::insert($proj);
-
     }
     public function relGerencial()
     {
@@ -949,6 +949,9 @@ class HomeController extends Controller
 
         $LGERGiroSubGrupo = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Giro_estoque\\giro-estoque-analise-gerencial-filial.json');
         $DLGERGiroSubGrupo = json_decode($LGERGiroSubGrupo);
+
+        $LGERMargemVendedor = file_get_contents('\\\\Srv-proexpress\\json_data\\margem-vendedor.json');
+        $DLGERMargemVendedor = json_decode($LGERMargemVendedor);
 
         // Giro Estoque
         foreach ($DLGERGiroEstoque as $ge) {
@@ -1082,7 +1085,7 @@ class HomeController extends Controller
         LGERAnaliseVendedores::where('uid', '>', 0)->truncate();
         LGERAnaliseVendedores::insert($aven);
         //################################################################################################################################
-    
+
         // Analise de Vendedores
         foreach ($DLGERConversaoVendedores as $cv) {
             $cven[] = [
@@ -1108,7 +1111,7 @@ class HomeController extends Controller
         //################################################################################################################################
 
         // Giro Estoque Sub Grupo
-       foreach ($DLGERGiroSubGrupo as $gesg) {
+        foreach ($DLGERGiroSubGrupo as $gesg) {
             $gesgst = [
                 'Atualizacao' => $gesg->Atualizacao,
                 'CodFilial' => $gesg->CodFilial,
@@ -1125,11 +1128,24 @@ class HomeController extends Controller
         $insert_giro = collect($insert_giro);
         $chunks = $insert_giro->chunk(1000);
         LGERGiroSubGrupo::where('uid', '>', 0)->truncate();
-        foreach($chunks as $chunk){
-        LGERGiroSubGrupo::insert($chunk->toArray());
-        }       
-//################################################################################################################################
+        foreach ($chunks as $chunk) {
+            LGERGiroSubGrupo::insert($chunk->toArray());
+        }
+        //################################################################################################################################
 
+        // Analise de margem do vendedor
+        foreach ($DLGERMargemVendedor as $mv) {
+            $mvend[] = [
+                'ano' => $mv->ano,
+                'mes' => $mv->mes,
+                'filial' => $mv->filial,
+                'vendedor' => $mv->vendedor,
+                'margem' => $mv->margem
+            ];
+        }
+        LGERMargemVendedor::where('uid', '>', 0)->truncate();
+        LGERMargemVendedor::insert($mvend);
+        //################################################################################################################################
     }
 
     /**
@@ -1262,7 +1278,7 @@ class HomeController extends Controller
     {
         $lkpis = LAcredKpis::orderByDesc('uid')->get();
         return json_encode($lkpis);
-    } 
+    }
 
     public function getLAcrGrafVencidos()
     {
@@ -1354,16 +1370,24 @@ class HomeController extends Controller
     }
 
     // Rotas API Usuários ************************
-    public function listUsers(){
+    public function listUsers()
+    {
         $usuarios = User::get();
         return response()->json($usuarios);
     }
 
-    public function listUsersAccess(){
+    public function listUsersAccess()
+    {
         $access = UserAccess::with('usuario')->get();
         return response()->json($access);
     }
-    
+
+    public function getLGERMargemVendedor()
+    {
+        $lmargemv = LGERMargemVendedor::orderByDesc('uid')->get();
+        return json_encode($lmargemv);
+    }
+
     public function login(LoginRequest $request, User $usuario)
     {
         $rcode = $request->code;
