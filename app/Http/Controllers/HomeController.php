@@ -58,10 +58,10 @@ class HomeController extends Controller
     public function resumo()
     {
 
-        $total = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\total.json');
-        $filial = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\filial.json');
-        $grupo = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\grupo.json');
-        $exportacao = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\exportacao.json');
+        $total = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/total.json');
+        $filial = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/filial.json');
+        $grupo = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/grupo.json');
+        $exportacao = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/exportacao.json');
 
         $jsontotal = json_decode($total, true);
         $jsonfilial = json_decode($filial, true);
@@ -86,11 +86,11 @@ class HomeController extends Controller
     public function relComprasLojas()
     {
         // Relatórios servicos Json Lojas Solar*******************************************************
-        $LRCComparativo = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_compras\\relcomparativo.json');
-        $LRCGrafico = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_compras\\relgrafico.json');
-        $LRCPerfAssoc = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_compras\\relperfassoc.json');
-        $LRCPerfMes = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_compras\\relperfmes.json');
-        $LRCTotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_compras\\reltotal.json');
+        $LRCComparativo = file_get_contents('/mnt/jsondata/Lojas/Rel_compras/relcomparativo.json');
+        $LRCGrafico = file_get_contents('/mnt/jsondata/Lojas/Rel_compras/relgrafico.json');
+        $LRCPerfAssoc = file_get_contents('/mnt/jsondata/Lojas/Rel_compras/relperfassoc.json');
+        $LRCPerfMes = file_get_contents('/mnt/jsondata/Lojas/Rel_compras/relperfmes.json');
+        $LRCTotal = file_get_contents('/mnt/jsondata/Lojas/Rel_compras/reltotal.json');
 
         $DLRCComparativo = json_decode($LRCComparativo);
         $DLRCGrafico = json_decode($LRCGrafico);
@@ -238,10 +238,10 @@ class HomeController extends Controller
     public function relServicosLojas()
     {
         // Relatórios servicos Json Lojas Solar*******************************************************
-        $LRSresumo = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_servicos\\relresumo.json');
-        $LRSGrafico = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_servicos\\relgrafico.json');
-        $LRSPerf = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_servicos\\relperformance.json');
-        $LRSTotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_servicos\\reltotal.json');
+        $LRSresumo = file_get_contents('/mnt/jsondata/Lojas/Rel_servicos/relresumo.json');
+        $LRSGrafico = file_get_contents('/mnt/jsondata/Lojas/Rel_servicos/relgrafico.json');
+        $LRSPerf = file_get_contents('/mnt/jsondata/Lojas/Rel_servicos/relperformance.json');
+        $LRSTotal = file_get_contents('/mnt/jsondata/Lojas/Rel_servicos/reltotal.json');
 
         $DLRSresumo = json_decode($LRSresumo);
         $DLRSGrafico = json_decode($LRSGrafico);
@@ -424,12 +424,12 @@ class HomeController extends Controller
     public function relFaturamentoLojas()
     {
         // Relatórios Faturamento Json Lojas Solar*******************************************************
-        $LRFaturamento = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\relfaturamento.json');
-        $LRFTotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\relfaturamentototal.json');
-        $LRFGrafico = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\relgraficoevolucao.json');
-        $LRFPerfAssoc = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\relperfassoc.json');
-        $LRFPerfMes = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\relperfmes.json');
-        $LRFTotalPerf = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Rel_faturamento\\reltotalperfassocmes.json');
+        $LRFaturamento = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/relfaturamento.json');
+        $LRFTotal = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/relfaturamentototal.json');
+        $LRFGrafico = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/relgraficoevolucao.json');
+        $LRFPerfAssoc = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/relperfassoc.json');
+        $LRFPerfMes = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/relperfmes.json');
+        $LRFTotalPerf = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento/reltotalperfassocmes.json');
 
         $DLRFaturamento = json_decode($LRFaturamento);
         $DLRFTotal = json_decode($LRFTotal);
@@ -646,18 +646,18 @@ class HomeController extends Controller
     {
 
         // Relatórios resumo Json Lojas Solar, Naturovos e Supermercados***********************************
-        $Lfilial = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Faturamento\\filial.json');
-        $Lassociacao = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Faturamento\\associacao.json');
-        $Ltotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Faturamento\\total.json');
+        $Lfilial = file_get_contents('/mnt/jsondata/Lojas/Faturamento/filial.json');
+        $Lassociacao = file_get_contents('/mnt/jsondata/Lojas/Faturamento/associacao.json');
+        $Ltotal = file_get_contents('/mnt/jsondata/Lojas/Faturamento/total.json');
 
-        $Sfilial = file_get_contents('\\\\Srv-proexpress\\json_data\\Supermercados\\Faturamento\\filial.json');
-        $Ssegmento = file_get_contents('\\\\Srv-proexpress\\json_data\\Supermercados\\Faturamento\\segmento.json');
-        $Stotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Supermercados\\Faturamento\\total.json');
+        $Sfilial = file_get_contents('/mnt/jsondata/Supermercados/Faturamento/filial.json');
+        $Ssegmento = file_get_contents('/mnt/jsondata/Supermercados/Faturamento/segmento.json');
+        $Stotal = file_get_contents('/mnt/jsondata/Supermercados/Faturamento/total.json');
 
-        $Nfilial     = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\filial.json');
-        $Nexportacao = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\exportacao.json');
-        $Ngrupo      = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\grupo.json');
-        $Ntotal      = file_get_contents('\\\\Srv-proexpress\\json_data\\Naturovos\\Faturamento\\total.json');
+        $Nfilial     = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/filial.json');
+        $Nexportacao = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/exportacao.json');
+        $Ngrupo      = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/grupo.json');
+        $Ntotal      = file_get_contents('/mnt/jsondata/Naturovos/Faturamento/total.json');
 
         $filiais = array_merge(
             json_decode($Lfilial),
@@ -802,16 +802,16 @@ class HomeController extends Controller
 
     public function analiseCreditoLojas()
     {
-        $pathKpi = "\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\kpis\\";
-        $pathVencimento = "\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\Vencimento\\";
-        $pathProjecao = "\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\Projecao\\";
+        $pathKpi = "/mnt/jsondata/Lojas/Analise Vencidos/kpis/";
+        $pathVencimento = "/mnt/jsondata/Lojas/Analise Vencidos/Vencimento/";
+        $pathProjecao = "/mnt/jsondata/Lojas/Analise Vencidos/Projecao/";
         $diretorioKpi = dir($pathKpi);
         $diretorioVencimento = dir($pathVencimento);
         $diretorioProjecao = dir($pathProjecao);
 
-        $LACKpisTotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\kpistotal\\analisekpistotal.json');
-        $LProjecaoTotal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\Projecaototal\\analiseprojecaototal.json');
-        $LVencimenTototal = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Analise Vencidos\\Vencimentototal\\analisevencidostotal.json');
+        $LACKpisTotal = file_get_contents('/mnt/jsondata/Lojas/Analise Vencidos/kpistotal/analisekpistotal.json');
+        $LProjecaoTotal = file_get_contents('/mnt/jsondata/Lojas/Analise Vencidos/Projecaototal/analiseprojecaototal.json');
+        $LVencimenTototal = file_get_contents('/mnt/jsondata/Lojas/Analise Vencidos/Vencimentototal/analisevencidostotal.json');
 
         $DLACKpisTotal = json_decode($LACKpisTotal);
         $DLProjecaoTotal = json_decode($LProjecaoTotal);
@@ -929,25 +929,25 @@ class HomeController extends Controller
     }
     public function relGerencial()
     {
-        $LGERAnaliseFiliais = file_get_contents('\\\\Srv-proexpress\\json_data\\analise_de_filiais.json');
+        $LGERAnaliseFiliais = file_get_contents('/mnt/jsondata/analise_de_filiais.json');
         $DLGERAnaliseFiliais = json_decode($LGERAnaliseFiliais);
 
-        $LGERInadimplencia = file_get_contents('\\\\Srv-proexpress\\json_data\\analise-de-filiais-inadimplencia.json');
+        $LGERInadimplencia = file_get_contents('/mnt/jsondata/analise-de-filiais-inadimplencia.json');
         $DLGERInadimplencia = json_decode($LGERInadimplencia);
 
-        $LGERConversaoFiliais = file_get_contents('\\\\Srv-proexpress\\json_data\\melhor-conversao-filiais.json');
+        $LGERConversaoFiliais = file_get_contents('/mnt/jsondata/melhor-conversao-filiais.json');
         $DLGERConversaoFiliais = json_decode($LGERConversaoFiliais);
 
-        $LGERGiroEstoque = file_get_contents('\\\\Srv-proexpress\\json_data\\giro-estoque.json');
+        $LGERGiroEstoque = file_get_contents('/mnt/jsondata/giro-estoque.json');
         $DLGERGiroEstoque = json_decode($LGERGiroEstoque);
 
-        $LGERAnaliseVendedores = file_get_contents('\\\\Srv-proexpress\\json_data\\vendas-vendedores.json');
+        $LGERAnaliseVendedores = file_get_contents('/mnt/jsondata/vendas-vendedores.json');
         $DLGERAnaliseVendedores = json_decode($LGERAnaliseVendedores);
 
-        $LGERConversaoVendedores = file_get_contents('\\\\Srv-proexpress\\json_data\\melhor-conversao-vendedores-filiais.json');
+        $LGERConversaoVendedores = file_get_contents('/mnt/jsondata/melhor-conversao-vendedores-filiais.json');
         $DLGERConversaoVendedores = json_decode($LGERConversaoVendedores);
 
-        $LGERGiroSubGrupo = file_get_contents('\\\\Srv-proexpress\\json_data\\Lojas\\Giro_estoque\\giro-estoque-analise-gerencial-filial.json');
+        $LGERGiroSubGrupo = file_get_contents('/mnt/jsondata/Lojas/Giro_estoque/giro-estoque-analise-gerencial-filial.json');
         $DLGERGiroSubGrupo = json_decode($LGERGiroSubGrupo);
 
         // Giro Estoque
