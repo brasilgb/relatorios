@@ -45,7 +45,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use PDO;
 
 class HomeController extends Controller
@@ -77,10 +77,10 @@ class HomeController extends Controller
             'jsongrupo' => $jsongrupo,
             'jsonexportacao' => $jsonexportacao
         ];
+
         $paper = array(0, 0, 426.00, 843.48);
-        $pdf = PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadView('relatorios/resumo', $data)->setPaper($paper, 'portrait');
-        // return $pdf->stream('resumo.pdf');
-        return $pdf->download('resumo.pdf');
+        $pdf = PDF::loadView('relatorios/resumo', $data)->setPaper($paper, 'portrait');
+        return $pdf->stream('resumo.pdf');
     }
 
     /** Procedimento de inserção de dados dos relatórios de Compras Lojas Solar */
