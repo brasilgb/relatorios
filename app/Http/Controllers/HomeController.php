@@ -950,7 +950,7 @@ class HomeController extends Controller
         $LGERGiroSubGrupo = file_get_contents('/mnt/jsondata/Lojas/Giro_estoque/giro-estoque-analise-gerencial-filial.json');
         $DLGERGiroSubGrupo = json_decode($LGERGiroSubGrupo);
 
-        $LGERMargemVendedor = file_get_contents('\\\\Srv-proexpress\\json_data\\margem-vendedor.json');
+        $LGERMargemVendedor = file_get_contents('/mnt/jsondata/margem-vendedor.json');
         $DLGERMargemVendedor = json_decode($LGERMargemVendedor);
 
         // Giro Estoque
