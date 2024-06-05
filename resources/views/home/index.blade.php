@@ -7,8 +7,8 @@
 </div>
 <div class="container mx-auto bg-gray-50 my-5 p-10 rounded-md shadow-md">
 
-    <form action="{{ route('resumo') }}" method="POST">
-        @method('POST')
+    <form action="{{ route('resumo') }}" method="GET">
+        @method('GET')
         @csrf
         <div class="flex flex-row justify-start items-center">
             <label class="pr-12 text-gray-600 text-xl">Gera relatório de resumo Naturovos</label>

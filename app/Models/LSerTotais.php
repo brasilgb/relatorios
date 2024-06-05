@@ -13,6 +13,7 @@ class LSerTotais extends Model
 
     protected $fillable = [
         'Atualizacao',
+        'DiaAtual',
         'GEDia',
         'PPDia',
         'GESemana',

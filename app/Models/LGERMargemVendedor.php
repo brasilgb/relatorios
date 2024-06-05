@@ -14,7 +14,7 @@ class LGERMargemVendedor extends Model
     protected $fillable = [
         'ano',
         'mes',
-        'filial',
+        'CodFilial',
         'vendedor',
         'margem'
     ];

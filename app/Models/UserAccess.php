@@ -13,6 +13,7 @@ class UserAccess extends Model
     
     protected $fillable = [
         'IdUsuario',
+	    'IdFilial',
         'Name',
         'Filial'
     ];

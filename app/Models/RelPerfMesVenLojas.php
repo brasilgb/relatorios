@@ -15,6 +15,7 @@ class RelPerfMesVenLojas extends Model
         'Atualizacao',
         'MesAno',
         'Meta',
+        'ColorMedia',
         'MediaFatu',
         'Margem',
         'RepFatu',

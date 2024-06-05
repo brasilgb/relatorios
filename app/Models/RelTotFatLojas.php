@@ -13,6 +13,8 @@ class RelTotFatLojas extends Model
 
     protected $fillable = [
         'Atualizacao',
+        'DiaAtual',
+        'DiaAnterior',
         'FatDia',
         'MargemDia',
         'FatuAnterior',

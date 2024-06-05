@@ -13,9 +13,14 @@ class LGERAnaliseVendedores extends Model
 
     protected $fillable = [
         'Atualizacao',
-        'Filial',
+        'CodFilial',
         'CodigoVendedor',
         'NomeVendedor',
+        'Margem',
+        'MargemPeriodo',
+        'JurosPeriodo',
+		'TiketMedio',
+		'QtdNF',
         'ValorGE',
         'MetaGE',
         'PercentualGE',

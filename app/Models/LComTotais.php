@@ -13,6 +13,8 @@ class LComTotais extends Model
 
     protected $fillable = [
         'Atualizacao',
+        'DiaAtual',
+        'DiaAnterior',
         'CompraDia',
         'CompraAnterior',
         'CompraSemana',

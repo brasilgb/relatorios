@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NaturovosController;
+use App\Http\Controllers\SupermercadosController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index']);
-Route::post('/resumo', [HomeController::class, 'resumo'])->name('resumo');
+Route::get('/resumo', [HomeController::class, 'resumo'])->name('resumo');
+
+Route::get('/naturovos', [NaturovosController::class, 'index']);
+Route::get('/supermercados', [SupermercadosController::class, 'index']);

@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Models\Assoc;
 use App\Models\Export;
 use App\Models\Filial;
+use App\Models\FiliaisAtivas;
 use App\Models\LAcredKpis;
 use App\Models\LAcredKpisTotal;
 use App\Models\LAcredProjecao;
@@ -35,7 +36,15 @@ use App\Models\LGERGiroEstoque;
 use App\Models\LGERInadimplencia;
 use App\Models\LGERGiroSubGrupo;
 use App\Models\LGERMargemVendedor;
+use App\Models\LGERFilialFatuDia;
+use App\Models\LGERFilialFatuTotal;
+use App\Models\LGERFilialAssoc;
+use App\Models\LGERFilialGrafico;
+use App\Models\LGERFilialTotalAssoc;
+use App\Models\LGERFilialMes;
 use App\Models\Total;
+use App\Models\TVEvolucao;
+use App\Models\TVFaturamento;
 use App\Models\User;
 use App\Models\UserAccess;
 use Carbon\Carbon;
@@ -45,15 +54,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
 use PDO;
+use App\Models\LGERFatuDia;
+use App\Models\LGERFatuTotal;
 
 class HomeController extends Controller
 {
     public function index()
     {
-
         return View('home.index');
+    }
+
+    public function filiaisAtivas()
+    {
+        $ExtFiliais = file_get_contents('/mnt/jsondata/Lojas/filiaislojassolar.json');
+        $DExtFiliais = json_decode($ExtFiliais);
+        // Inserção de filiais ativas e com metas***************************
+        $listFilial = FiliaisAtivas::get();
+        foreach ($DExtFiliais as $ef) {
+
+            $extfil[] = [
+                'CodFilial' => $ef->CodFilial,
+                'NomeFilial' => $ef->NomeFilial,
+                'BairroFilial' => $ef->BairroFilial,
+                'EnderecoFilial' => $ef->EnderecoFilial,
+                'GerenteFilial' => $ef->GerenteFilial
+            ];
+        }
+
+        if ($listFilial->count() > 0) {
+            FiliaisAtivas::where('idFilial', '>', 0)->truncate();
+            FiliaisAtivas::insert($extfil);
+        } else {
+            FiliaisAtivas::insert($extfil);
+        }
     }
 
     public function resumo()
@@ -69,7 +104,7 @@ class HomeController extends Controller
         $jsongrupo = json_decode($grupo, true);
         $jsonexportacao = json_decode($exportacao, true);
 
-        //return View('relatorios/resumo', compact(['jsontotal', 'jsonfilial', 'jsongrupo', 'jsonexportacao']));
+        // return View('relatorios/resumo', compact(['jsontotal', 'jsonfilial', 'jsongrupo', 'jsonexportacao']));
 
         $data = [
             'jsontotal' => $jsontotal,
@@ -77,10 +112,14 @@ class HomeController extends Controller
             'jsongrupo' => $jsongrupo,
             'jsonexportacao' => $jsonexportacao
         ];
-
         $paper = array(0, 0, 426.00, 843.48);
-        $pdf = PDF::loadView('relatorios/resumo', $data)->setPaper($paper, 'portrait');
-        return $pdf->stream('resumo.pdf');
+
+        $pdf = PDF::setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true
+        ])->loadView('relatorios/resumo', $data)->setPaper($paper, 'portrait');
+        // return $pdf->stream('resumo.pdf');
+        return $pdf->download('resumo.pdf');
     }
 
     /** Procedimento de inserção de dados dos relatórios de Compras Lojas Solar */
@@ -113,7 +152,8 @@ class HomeController extends Controller
                 'CompraAnterior' => $com->CompraAnterior,
                 'CompraSemana' => $com->CompraSemana,
                 'CompraMes' => $com->CompraMes,
-                'Rep' => $com->Rep,
+                'ColorRep' => $com->ColorRep,
+                'Rep' => $com->Rep == '-' ? 0 : $com->Rep,
                 'PrazoMedio' => $com->PrazoMedio
             ];
         }
@@ -121,7 +161,7 @@ class HomeController extends Controller
         if ($dataComp->count() == 0) {
             LComComparadia::insert($comp);
         } else if ($dataComp1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataComp->first()->Atualizacao)->format("Y-m-d")) {
-            LComComparadia::whereDate('Atualizacao', $dataComp1)->truncate();
+            LComComparadia::whereDate('Atualizacao', $dataComp1)->delete();
             LComComparadia::insert($comp);
         } else {
             LComComparadia::insert($comp);
@@ -144,7 +184,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             LComGrafico::insert($graf);
         } else if ($dataComp2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            LComGrafico::whereDate('Atualizacao', $dataComp2)->truncate();
+            LComGrafico::whereDate('Atualizacao', $dataComp2)->delete();
             LComGrafico::insert($graf);
         } else {
             LComGrafico::insert($graf);
@@ -161,7 +201,7 @@ class HomeController extends Controller
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $ass->Atualizacao)->format("Y-m-d H:i:s"),
                 'Assoc' => $ass->Assoc,
                 'Compras' => $ass->Compras,
-                'Rep' => $ass->Rep,
+                'Rep' => $ass->Rep == '-' ? 0 : $ass->Rep,
                 'PrazoMedio' => $ass->PrazoMedio
             ];
         }
@@ -169,7 +209,7 @@ class HomeController extends Controller
         if ($dataAss->count() == 0) {
             LComPerfAssoc::insert($assoc);
         } else if ($dataComp3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataAss->first()->Atualizacao)->format("Y-m-d")) {
-            LComPerfAssoc::whereDate('Atualizacao', $dataComp3)->truncate();
+            LComPerfAssoc::whereDate('Atualizacao', $dataComp3)->delete();
             LComPerfAssoc::insert($assoc);
         } else {
             LComPerfAssoc::insert($assoc);
@@ -187,7 +227,7 @@ class HomeController extends Controller
                 'AnoMesNum' => $mes->AnoMesNum,
                 'MesAno' => $mes->MesAno,
                 'MediaCompra' => $mes->MediaCompra,
-                'Rep' => $mes->Rep,
+                'Rep' => $mes->Rep == '-' ? 0 : $mes->Rep,
                 'PrazoMedio' => $mes->PrazoMedio
             ];
         }
@@ -195,7 +235,7 @@ class HomeController extends Controller
         if ($dataMes->count() == 0) {
             LComPerfMes::insert($meses);
         } else if ($dataComp4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataMes->first()->Atualizacao)->format("Y-m-d")) {
-            LComPerfMes::whereDate('Atualizacao', $dataComp4)->truncate();
+            LComPerfMes::whereDate('Atualizacao', $dataComp4)->delete();
             LComPerfMes::insert($meses);
         } else {
             LComPerfMes::insert($meses);
@@ -210,14 +250,16 @@ class HomeController extends Controller
         foreach ($DLRCTotal as $tot) {
             $tota[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $tot->Atualizacao)->format("Y-m-d H:i:s"),
+                'DiaAtual' => $tot->DiaAtual,
+                'DiaAnterior' => $tot->DiaAnterior,
                 'CompraDia' => $tot->CompraDia,
                 'CompraAnterior' => $tot->CompraAnterior,
                 'CompraSemana' => $tot->CompraSemana,
                 'CompraMes' => $tot->CompraMes,
-                'Rep' => $tot->Rep,
+                'Rep' => $tot->Rep == '-' ? 0 : $tot->Rep,
                 'PrazoMedio' => $tot->PrazoMedio,
                 'MediaCompraMes' => $tot->MediaCompraMes,
-                'RepMes' => $tot->RepMes,
+                'RepMes' => $tot->RepMes == '-' ? 0 : $tot->RepMes,
                 'PrazoMedioMes' => $tot->PrazoMedioMes,
                 'ComprasAssoc' => $tot->ComprasAssoc,
                 'RepAssoc' => $tot->RepAssoc,
@@ -228,7 +270,7 @@ class HomeController extends Controller
         if ($dataTot->count() == 0) {
             LComTotais::insert($tota);
         } else if ($dataComp5 == Carbon::createFromFormat("Y-m-d H:i:s", $dataTot->first()->Atualizacao)->format("Y-m-d")) {
-            LComTotais::whereDate('Atualizacao', $dataComp5)->truncate();
+            LComTotais::whereDate('Atualizacao', $dataComp5)->delete();
             LComTotais::insert($tota);
         } else {
             LComTotais::insert($tota);
@@ -276,7 +318,7 @@ class HomeController extends Controller
         if ($dataResum->count() == 0) {
             LSerResumoDia::insert($resum);
         } else if ($dataSer1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataResum->first()->Atualizacao)->format("Y-m-d")) {
-            LSerResumoDia::whereDate('Atualizacao', $dataSer1)->truncate();
+            LSerResumoDia::whereDate('Atualizacao', $dataSer1)->delete();
             LSerResumoDia::insert($resum);
         } else {
             LSerResumoDia::insert($resum);
@@ -300,7 +342,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             LSerGrafico::insert($graf);
         } else if ($dataSer2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            LSerGrafico::whereDate('Atualizacao', $dataSer2)->truncate();
+            LSerGrafico::whereDate('Atualizacao', $dataSer2)->delete();
             LSerGrafico::insert($graf);
         } else {
             LSerGrafico::insert($graf);
@@ -315,6 +357,7 @@ class HomeController extends Controller
         foreach ($DLRSPerf as $per) {
             $perf[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $per->Atualizacao)->format("Y-m-d H:i:s"),
+                'AnoMesNum' => $per->AnoMesNum,
                 'PerfMesAno' => $per->PerfMesAno,
                 'PerfValorGE' => $per->PerfValorGE,
                 'PerfRepGE' => $per->PerfRepGE,
@@ -333,7 +376,7 @@ class HomeController extends Controller
         if ($dataPerf->count() == 0) {
             LSerPerform::insert($perf);
         } else if ($dataSer3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerf->first()->Atualizacao)->format("Y-m-d")) {
-            LSerPerform::whereDate('Atualizacao', $dataSer3)->truncate();
+            LSerPerform::whereDate('Atualizacao', $dataSer3)->delete();
             LSerPerform::insert($perf);
         } else {
             LSerPerform::insert($perf);
@@ -348,6 +391,8 @@ class HomeController extends Controller
         foreach ($DLRSTotal as $tot) {
             $tota[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $tot->Atualizacao)->format("Y-m-d H:i:s"),
+                'DataChave' => $tot->DataChave,
+                'DiaChave' => $tot->DiaChave,
                 'GEDia' => $tot->GEDia,
                 'PPDia' => $tot->PPDia,
                 'GESemana' => $tot->GESemana,
@@ -414,7 +459,7 @@ class HomeController extends Controller
         if ($dataTot->count() == 0) {
             LSerTotais::insert($tota);
         } else if ($dataSer4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataTot->first()->Atualizacao)->format("Y-m-d")) {
-            LSerTotais::whereDate('Atualizacao', $dataSer4)->truncate();
+            LSerTotais::whereDate('Atualizacao', $dataSer4)->delete();
             LSerTotais::insert($tota);
         } else {
             LSerTotais::insert($tota);
@@ -469,7 +514,7 @@ class HomeController extends Controller
             RelFatuLojas::insert($fat);
         } else if ($dataFatu1 == Carbon::createFromFormat("Y-m-d H:i:s", $dataFaturamento->first()->Atualizacao)->format("Y-m-d")) {
             //$this->messageError('filiais');
-            RelFatuLojas::whereDate('Atualizacao', $dataFatu1)->truncate();
+            RelFatuLojas::whereDate('Atualizacao', $dataFatu1)->delete();
             RelFatuLojas::insert($fat);
         } else {
             RelFatuLojas::insert($fat);
@@ -484,6 +529,8 @@ class HomeController extends Controller
 
             $totfat[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $tfatu->Atualizacao)->format("Y-m-d H:i:s"),
+                'DiaAtual' => $tfatu->DiaAtual,
+                'DiaAnterior' => $tfatu->DiaAnterior,
                 'FatuDia' => $tfatu->FatuDia,
                 'MargemDia' => $tfatu->MargemDia,
                 'FatuAnterior' => $tfatu->FatuAnterior,
@@ -514,7 +561,7 @@ class HomeController extends Controller
         if ($dataFatTotal->count() == 0) {
             RelTotFatLojas::insert($totfat);
         } else if ($dataFatu2 == Carbon::createFromFormat("Y-m-d H:i:s", $dataFatTotal->first()->Atualizacao)->format("Y-m-d")) {
-            RelTotFatLojas::whereDate('Atualizacao', $dataFatu2)->truncate();
+            RelTotFatLojas::whereDate('Atualizacao', $dataFatu2)->delete();
             RelTotFatLojas::insert($totfat);
         } else {
             RelTotFatLojas::insert($totfat);
@@ -539,7 +586,7 @@ class HomeController extends Controller
         if ($dataGraf->count() == 0) {
             RelGrafVenLojas::insert($graf);
         } else if ($dataFatu3 == Carbon::createFromFormat("Y-m-d H:i:s", $dataGraf->first()->Atualizacao)->format("Y-m-d")) {
-            RelGrafVenLojas::whereDate('Atualizacao', $dataFatu3)->truncate();
+            RelGrafVenLojas::whereDate('Atualizacao', $dataFatu3)->delete();
             RelGrafVenLojas::insert($graf);
         } else {
             RelGrafVenLojas::insert($graf);
@@ -569,7 +616,7 @@ class HomeController extends Controller
         if ($dataPerfAssoc->count() == 0) {
             RelPerfAssocVenLojas::insert($perfassoc);
         } else if ($dataFatu4 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerfAssoc->first()->Atualizacao)->format("Y-m-d")) {
-            RelPerfAssocVenLojas::whereDate('Atualizacao', $dataFatu4)->truncate();
+            RelPerfAssocVenLojas::whereDate('Atualizacao', $dataFatu4)->delete();
             RelPerfAssocVenLojas::insert($perfassoc);
         } else {
             RelPerfAssocVenLojas::insert($perfassoc);
@@ -586,6 +633,7 @@ class HomeController extends Controller
                 'AnoMesNum' => $perfm->AnoMesNum,
                 'MesAno' => $perfm->MesAno,
                 'Meta' => $perfm->Meta,
+                'ColorMedia' => $perfm->ColorMedia,
                 'MediaFatu' => $perfm->MediaFatu,
                 'Margem' => $perfm->Margem,
                 'RepFatu' => $perfm->RepFatu,
@@ -598,7 +646,7 @@ class HomeController extends Controller
         if ($dataPerfMes->count() == 0) {
             RelPerfMesVenLojas::insert($perfmes);
         } else if ($dataFatu5 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerfMes->first()->Atualizacao)->format("Y-m-d")) {
-            RelPerfMesVenLojas::whereDate('Atualizacao', $dataFatu5)->truncate();
+            RelPerfMesVenLojas::whereDate('Atualizacao', $dataFatu5)->delete();
             RelPerfMesVenLojas::insert($perfmes);
         } else {
             RelPerfMesVenLojas::insert($perfmes);
@@ -633,7 +681,7 @@ class HomeController extends Controller
         if ($dataPerf->count() == 0) {
             RelTotPerfVenLojas::insert($perf);
         } else if ($dataFatu6 == Carbon::createFromFormat("Y-m-d H:i:s", $dataPerf->first()->Atualizacao)->format("Y-m-d")) {
-            RelTotPerfVenLojas::whereDate('Atualizacao', $dataFatu6)->truncate();
+            RelTotPerfVenLojas::whereDate('Atualizacao', $dataFatu6)->delete();
             RelTotPerfVenLojas::insert($perf);
         } else {
             RelTotPerfVenLojas::insert($perf);
@@ -688,12 +736,12 @@ class HomeController extends Controller
         foreach ($filiais as $fil) {
             $fili[] = [
                 'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $fil->Atualizacao)->format("Y-m-d H:i:s"),
-                'Departamento' => $fil->Departamento,
+                'Departamento' => $fil->Departamento == '-' ? 0 : $fil->Departamento,
                 'Filial' => $fil->Filial,
                 'Faturamento' => $fil->Faturamento,
                 'RepFaturamento' => $fil->RepFaturamento,
                 'Projecao' => $fil->Projecao,
-                'Margem' => $fil->Margem,
+                'Margem' => $fil->Margem == '-' ? 0 : $fil->Margem,
                 'TicketMedio' => $fil->TicketMedio ? $fil->TicketMedio : 0,
                 'PrecoMedio' => $fil->PrecoMedio ? $fil->PrecoMedio : 0,
                 'MetaAlcancada' => $fil->MetaAlcancada ? $fil->MetaAlcancada : 0
@@ -703,7 +751,7 @@ class HomeController extends Controller
         if ($datacadFilial->count() == 0) {
             Filial::insert($fili);
         } else if ($dataRes1 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadFilial->first()->Atualizacao)->format("Y-m-d")) {
-            Filial::whereDate('Atualizacao', $dataRes1)->truncate();
+            Filial::whereDate('Atualizacao', $dataRes1)->delete();
             Filial::insert($fili);
         } else {
             Filial::insert($fili);
@@ -732,38 +780,39 @@ class HomeController extends Controller
             Assoc::insert($assoc);
         } else if ($dataRes2 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadAssoc->first()->Atualizacao)->format("Y-m-d")) {
 
-            Assoc::whereDate('Atualizacao', $dataRes2)->truncate();
+            Assoc::whereDate('Atualizacao', $dataRes2)->delete();
             Assoc::insert($assoc);
         } else {
             Assoc::insert($assoc);
         }
 
         // Inerção de dados Exportacao
-        $datacadExp = Export::orderByDesc('id_exp');
-        foreach (array_slice($exportacoes, 0, 1) as $fdt) {
-            $dataRes3 = Carbon::createFromFormat("d/m/Y H:i:s", $fdt->Atualizacao)->format("Y-m-d");
-        }
-        foreach ($exportacoes as $exp) {
-            $export[] = [
-                'Atualizacao' =>  Carbon::createFromFormat("d/m/Y H:i:s", $exp->Atualizacao)->format("Y-m-d H:i:s"),
-                'Departamento' => $exp->Departamento,
-                'Pais' => $exp->Pais,
-                'Faturamento' => $exp->Faturamento,
-                'RepFaturamento' => $exp->RepFaturamento,
-                'Margem' => $exp->Margem,
-                'PrecoMedio' => $exp->PrecoMedio
-            ];
-        }
-        if ($datacadExp->count() == 0) {
-            Export::insert($export);
-        } else if ($dataRes3 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadExp->first()->Atualizacao)->format("Y-m-d")) {
-            //$this->messageError('exportacao');
-            Export::whereDate('Atualizacao', $dataRes3)->truncate();
-            Export::insert($export);
-        } else {
-            Export::insert($export);
-        }
-
+        if ($exportacoes and $exportacoes[0]->Faturamento != "-") :
+            $datacadExp = Export::orderByDesc('id_exp');
+            foreach (array_slice($exportacoes, 0, 1) as $fdt) {
+                $dataRes3 = Carbon::createFromFormat("d/m/Y H:i:s", $fdt->Atualizacao)->format("Y-m-d");
+            }
+            foreach ($exportacoes as $exp) {
+                $export[] = [
+                    'Atualizacao' =>  Carbon::createFromFormat("d/m/Y H:i:s", $exp->Atualizacao)->format("Y-m-d H:i:s"),
+                    'Departamento' => $exp->Departamento,
+                    'Pais' => $exp->Pais,
+                    'Faturamento' => $exp->Faturamento,
+                    'RepFaturamento' => $exp->RepFaturamento,
+                    'Margem' => $exp->Margem,
+                    'PrecoMedio' => $exp->PrecoMedio
+                ];
+            }
+            if ($datacadExp->count() == 0) {
+                Export::insert($export);
+            } else if ($dataRes3 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadExp->first()->Atualizacao)->format("Y-m-d")) {
+                //$this->messageError('exportacao');
+                Export::whereDate('Atualizacao', $dataRes3)->delete();
+                Export::insert($export);
+            } else {
+                Export::insert($export);
+            }
+        endif;
 
         // Inerção de dados Totais
         $datacadTot = Total::orderByDesc('id_total');
@@ -773,7 +822,7 @@ class HomeController extends Controller
         foreach ($totais as $to) {
             $tot[] = [
                 'Atualizacao' =>  Carbon::createFromFormat("d/m/Y H:i:s", $to->Atualizacao)->format("Y-m-d H:i:s"),
-                'Departamento' => $to->Departamento,
+                'Departamento' => $to->Departamento == '-' ? 0 : $to->Departamento,
                 'Meta' => $to->Meta,
                 'Faturamento' => $to->Faturamento,
                 'Projecao' => $to->Projecao,
@@ -792,7 +841,7 @@ class HomeController extends Controller
             return;
         } else if ($dataRes4 == Carbon::createFromFormat("Y-m-d H:i:s", $datacadTot->first()->Atualizacao)->format("Y-m-d")) {
             //$this->messageError('exportacao');
-            Total::whereDate('Atualizacao', $dataRes4)->truncate();
+            Total::whereDate('Atualizacao', $dataRes4)->delete();
             Total::insert($tot);
             return;
         } else {
@@ -803,6 +852,7 @@ class HomeController extends Controller
 
     public function analiseCreditoLojas()
     {
+
         $pathKpi = "/mnt/jsondata/Lojas/Analise Vencidos/kpis/";
         $pathVencimento = "/mnt/jsondata/Lojas/Analise Vencidos/Vencimento/";
         $pathProjecao = "/mnt/jsondata/Lojas/Analise Vencidos/Projecao/";
@@ -927,6 +977,168 @@ class HomeController extends Controller
         LAcredProjecaoTotal::where('uid', '>', 0)->truncate();
         LAcredProjecaoTotal::insert($proj);
     }
+    // Relatórios gerencial por filial
+	public function relGerencialFiliais()
+    {
+        $LGERFilialFatuDia = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial.json');
+        $DLGERFilialFatuDia = json_decode($LGERFilialFatuDia);
+
+        $LGERFilialFatuTotal = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial-total.json');
+        $DLGERFilialFatuTotal = json_decode($LGERFilialFatuTotal);
+
+        $LGERFilialAssoc = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial-assoc.json');
+        $DLGERFilialAssoc = json_decode($LGERFilialAssoc);
+
+        $LGERFilialGrafico = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial-grafico.json');
+        $DLGERFilialGrafico = json_decode($LGERFilialGrafico);
+
+        $LGERFilialTotalAssoc = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial-total-assoc.json');
+        $DLGERFilialTotalAssoc = json_decode($LGERFilialTotalAssoc);
+
+        $LGERFilialMes = file_get_contents('/mnt/jsondata/Lojas/Rel_faturamento_gerencial/faturamento-filial-gerencial-mes.json');
+        $DLGERFilialMes = json_decode($LGERFilialMes);
+
+        // Faturamento por filial
+        foreach ($DLGERFilialFatuDia as $ftd) {
+            $ftdia[] = [
+                'FilialId' => $ftd->FilialId,
+                'Filial' => $ftd->Filial,
+                'Associacao' => $ftd->Associacao,
+                'FatuDia' => $ftd->FatuDia,
+                'MargemDia' => $ftd->MargemDia,
+                'FatuAnterior' => $ftd->FatuAnterior,
+                'MargemAnterior' => $ftd->MargemAnterior,
+                'FatuSemana' => $ftd->FatuSemana,
+                'MargemSemana' => $ftd->MargemSemana,
+                'FatuMes' => $ftd->FatuMes,
+                'MargemMes' => $ftd->MargemMes,
+                'CompDia' => $ftd->CompDia,
+                'CompMes' => $ftd->CompMes,
+                'RepFatu' => $ftd->RepFatu,
+                'JurosSPM' => $ftd->JurosSPM,
+                'RepSemFatu' => $ftd->RepSemFatu
+            ];
+        }
+        LGERFilialFatuDia::where('idfat', '>', 0)->truncate();
+        LGERFilialFatuDia::insert($ftdia);
+
+        // Faturamento total por filial
+        foreach ($DLGERFilialFatuTotal as $ftt) {
+            $fttotal[] = [
+                'Atualizacao' => $ftt->Atualizacao,
+                'FilialId' => $ftt->FilialId,
+                'Filial' => $ftt->Filial,
+                'FatuDia' => $ftt->FatuDia,
+                'MargemDia' => $ftt->MargemDia,
+				"DiaAtual" => $ftt->DiaAtual,
+				"DiaAnterior" => $ftt->DiaAnterior,
+                'FatuAnterior' => $ftt->FatuAnterior,
+                'MargemAnterior' => $ftt->MargemAnterior,
+                'FatuSemana' => $ftt->FatuSemana,
+                'MargemSemana' => $ftt->MargemSemana,
+                'FatuMes' => $ftt->FatuMes,
+                'MargemMes' => $ftt->MargemMes,
+                'RepFatu' => $ftt->RepFatu,
+                'JurosSPM' => $ftt->JurosSPM,
+                'RepSemFatu' => $ftt->RepSemFatu,
+                'MetaMes' => $ftt->MetaMes,
+                'VendaMes' => $ftt->VendaMes,
+                'FaltaVenderMes' => $ftt->FaltaVenderMes,
+                'MetaParcMes' => $ftt->MetaParcMes,
+                'AtingidoMes' => $ftt->AtingidoMes,
+                'PerfAtualMes' => $ftt->PerfAtualMes,
+                'MetaDia' => $ftt->MetaDia,
+                'VendaDia' => $ftt->VendaDia,
+                'FaltaVenderDia' => $ftt->FaltaVenderDia,
+                'PerfMetaDia' => $ftt->PerfMetaDia,
+                'JurSParcDia' => $ftt->JurSParcDia,
+                'PerfJurDia' => $ftt->PerfJurDia,
+                'MediaDia' => $ftt->MediaDia,
+            ];
+        }
+        LGERFilialFatuTotal::where('idtot', '>', 0)->truncate();
+        LGERFilialFatuTotal::insert($fttotal);
+
+        // Associação por filial
+        foreach ($DLGERFilialAssoc as $fta) {
+            $ftassoc[] = [
+                "FilialId" => $fta->FilialId,
+                "Filial" => $fta->Filial,
+                "Assoc" => $fta->Assoc,
+                "Faturamento" => $fta->Faturamento,
+                "Margem" => $fta->Margem,
+                "RepFat" => $fta->RepFat,
+                "JurSFat" => $fta->JurSFat,
+                "RepJuros" => $fta->RepJuros,
+                "Estoque" => $fta->Estoque,
+                "Giro" => $fta->Giro,
+                "RepEstoque" => $fta->RepEstoque
+            ];
+        }
+        LGERFilialAssoc::where('idassoc', '>', 0)->truncate();
+        LGERFilialAssoc::insert($ftassoc);
+
+        // Gráfico por filial
+        foreach ($DLGERFilialGrafico as $ftg) {
+            $ftgrafico[] = [
+                "FilialId" => $ftg->FilialId,
+                "Filial" => $ftg->Filial,
+                "DiaSemana" => $ftg->DiaSemana,
+                "Venda" => $ftg->Venda,
+                "Margem" => $ftg->Margem,
+                "Meta" => $ftg->Meta
+            ];
+        }
+        LGERFilialGrafico::where('idgrafico', '>', 0)->truncate();
+        LGERFilialGrafico::insert($ftgrafico);
+
+
+        // Associacao por filial
+        foreach ($DLGERFilialTotalAssoc as $ftat) {
+            $ftatotal[] = [
+                "Atualizacao" => $ftat->Atualizacao,
+                "FilialId" => $ftat->FilialId,
+                "Filial" => $ftat->Filial,
+                "MetaMes" => $ftat->MetaMes,
+                "MediaFatuMes" => $ftat->MediaFatuMes,
+                "MargemMes" => $ftat->MargemMes,
+                "RepFatuMes" => $ftat->RepFatuMes,
+                "MetaAlcancadaMes" => $ftat->MetaAlcancadaMes,
+                "MedJurSParcMes" => $ftat->MedJurSParcMes,
+                "RepJurosMes" => $ftat->RepJurosMes,
+                "FaturamentoAss" => $ftat->FaturamentoAss,
+                "MargemAss" => $ftat->MargemAss,
+                "RepFatAss" => $ftat->RepFatAss,
+                "JurSFatAss" => $ftat->JurSFatAss,
+                "RepJurosAss" => $ftat->RepJurosAss,
+                "EstoqueAss" => $ftat->EstoqueAss,
+                "GiroAss" => $ftat->GiroAss,
+                "RepEstoqueAss" => $ftat->RepEstoqueAss,
+            ];
+        }
+        LGERFilialTotalAssoc::where('idtotal', '>', 0)->truncate();
+        LGERFilialTotalAssoc::insert($ftatotal);
+
+        // Associacao por filial
+        foreach ($DLGERFilialMes as $ftm) {
+            $ftames[] = [
+                "FilialId" => $ftm->FilialId,
+                "Filial" => $ftm->Filial,
+                "AnoMesNum" => $ftm->AnoMesNum,
+                "MesAno" => $ftm->MesAno,
+                "Meta" => $ftm->Meta,
+                "MediaFatu" => $ftm->MediaFatu,
+                "Margem" => $ftm->Margem,
+                "RepFatu" => $ftm->RepFatu,
+                "MetaAlcancada" => $ftm->MetaAlcancada,
+                "MedJurSParc" => $ftm->MedJurSParc,
+                "RepJuros" => $ftm->RepJuros
+            ];
+        }
+        LGERFilialMes::where('idmes', '>', 0)->truncate();
+        LGERFilialMes::insert($ftames);
+    }
+
     public function relGerencial()
     {
         $LGERAnaliseFiliais = file_get_contents('/mnt/jsondata/analise_de_filiais.json');
@@ -952,6 +1164,8 @@ class HomeController extends Controller
 
         $LGERMargemVendedor = file_get_contents('/mnt/jsondata/margem-vendedor.json');
         $DLGERMargemVendedor = json_decode($LGERMargemVendedor);
+
+        //################################################################################################################################
 
         // Giro Estoque
         foreach ($DLGERGiroEstoque as $ge) {
@@ -1022,12 +1236,16 @@ class HomeController extends Controller
         foreach ($DLGERAnaliseFiliais as $af) {
             $afil[] = [
                 'Atualizacao' => $af->Atualizacao,
-                'CodFilial' => $af->Cod_Filial,
+                'CodFilial' => is_numeric($af->Cod_Filial) ? $af->Cod_Filial : '0',
                 'Filial' => $af->Filial,
                 'Valor_Faturado' => $af->Valor_Faturado,
                 'Valor_Meta' => $af->Valor_Meta,
                 'Meta_Vendas' => $af->Meta_Vendas,
                 'Margem' => $af->Margem,
+                'MargemPeriodo' => $af->MargemPeriodo,
+                'JurosPeriodo' => $af->JurosPeriodo,
+                'TiketMedio' => $af->TiketMedio,
+                'QtdNF' => $af->QtdNF,
                 'ValorGE' => $af->ValorGE,
                 'MetaGE' => $af->MetaGE,
                 'ElegiveisGE' => $af->ElegiveisGE,
@@ -1064,11 +1282,14 @@ class HomeController extends Controller
         foreach ($DLGERAnaliseVendedores as $av) {
             $aven[] = [
                 'Atualizacao' => $av->Atualizacao,
-                'Filial' => $av->Filial,
+                'CodFilial' =>  is_numeric($av->Filial) ? $av->Filial : '0',
                 'CodigoVendedor' => $av->CodigoVendedor,
                 'NomeVendedor' => $av->NomeVendedor,
-                'ValorGE' => $av->ValorGE,
-                'MetaGE' => $av->MetaGE,
+                'Margem' => $av->Margem,
+                'MargemPeriodo' => $av->MargemPeriodo,
+                'JurosPeriodo' => $av->JurosPeriodo,
+                'TiketMedio' => $av->TiketMedio,
+                'QtdNF' => $av->QtdNF,
                 'ValorGE' => $av->ValorGE,
                 'MetaGE' => $av->MetaGE,
                 'PercentualGE' => $av->PercentualGE,
@@ -1090,14 +1311,8 @@ class HomeController extends Controller
         foreach ($DLGERConversaoVendedores as $cv) {
             $cven[] = [
                 'Atualizacao' => $cv->Atualizacao,
-                'CodigoFilial' => $cv->CodigoFilial,
+                'CodFilial' =>  is_numeric($cv->CodFilial) ? $cv->CodFilial : '0',
                 'DescricaoFilial' => $cv->DescricaoFilial,
-                'CodigoVendedorGE' => $cv->CodigoVendedorGE,
-                'RotuloMelhorGE' => $cv->RotuloMelhorGE,
-                'ValorMelhorGE' => $cv->ValorMelhorGE,
-                'CodigoVendedorPP' => $cv->CodigoVendedorPP,
-                'RotuloMelhorPP' => $cv->RotuloMelhorPP,
-                'ValorMelhorPP' => $cv->ValorMelhorPP,
                 'CodigoVendedorVenda' => $cv->CodigoVendedorVenda,
                 'RotuloMelhorVenda' => $cv->RotuloMelhorVenda,
                 'ValorMelhorVenda' => $cv->ValorMelhorVenda,
@@ -1116,12 +1331,12 @@ class HomeController extends Controller
                 'Atualizacao' => $gesg->Atualizacao,
                 'CodFilial' => $gesg->CodFilial,
                 'Filial' => $gesg->Filial,
-                'CodSubGrupo' => $gesg->CodSubGrupo,
-                'SubGrupo' => $gesg->SubGrupo,
-                'ValorEstoque' => $gesg->ValorEstoque,
-                'ValorAtual' => $gesg->ValorAtual,
-                'GiroFilial' => $gesg->GiroFilial,
-                'GiroRede' => $gesg->GiroRede,
+                'codigoSubgrupo' => $gesg->CodSubGrupo,
+                'descricaoSubgrupo' => $gesg->SubGrupo,
+                'valorEstoque' => $gesg->ValorEstoque,
+                'valorAtual' => $gesg->ValorAtual,
+                'giroFilial' => $gesg->GiroFilial,
+                'giroRede' => $gesg->GiroRede,
             ];
             $insert_giro[] = $gesgst;
         }
@@ -1138,27 +1353,84 @@ class HomeController extends Controller
             $mvend[] = [
                 'ano' => $mv->ano,
                 'mes' => $mv->mes,
-                'filial' => $mv->filial,
+                'CodFilial' => $mv->CodFilial,
                 'vendedor' => $mv->vendedor,
                 'margem' => $mv->margem
             ];
         }
-        LGERMargemVendedor::where('uid', '>', 0)->truncate();
-        LGERMargemVendedor::insert($mvend);
+        if ($DLGERMargemVendedor) {
+            LGERMargemVendedor::where('uid', '>', 0)->truncate();
+            LGERMargemVendedor::insert($mvend);
+        }
         //################################################################################################################################
     }
+
+    // Grava dados de informações para a aplicação da TV do administrativo
+    public function appTVLojas()
+    {
+        $LTVFaturamento = file_get_contents('/mnt/jsondata/PainelTV/faturamento-painel-tv.json');
+        $LTVEvolucao = file_get_contents('/mnt/jsondata/PainelTV/grafico-painel-tv.json');
+        $DLTVFaturamento = json_decode($LTVFaturamento);
+        $DLTVEvolucao = json_decode($LTVEvolucao);
+
+        // Inserção de dados totais compras***************************
+        foreach ($DLTVFaturamento as $fat) {
+            $faturamento[] = [
+                'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $fat->Atualizacao)->format("Y-m-d H:i:s"),
+                'Dia' => $fat->Dia,
+                'Mes' => $fat->Mes,
+                'Ano' => $fat->Ano,
+                'MetaDia' => $fat->MetaDia,
+                'MetaAlcancadaDia' => $fat->MetaAlcancadaDia,
+                'VendaDia' => $fat->VendaDia,
+                'PerformanceDia' => $fat->PerformanceDia,
+                'DiferencaDia' => $fat->DiferencaDia,
+                'MetaMes' => $fat->MetaMes,
+                'VendaAlcancadaMes' => $fat->VendaAlcancadaMes,
+                'MetaAlcancadaMes' => $fat->MetaAlcancadaMes,
+                'VendaMes' => $fat->VendaMes,
+                'PerformanceMes' => $fat->PerformanceMes,
+                'MetaAcumuladaMes' => $fat->MetaAcumuladaMes,
+                'DiferencaMes' => $fat->DiferencaMes,
+                'MetaAcumuladaAno' => $fat->MetaAcumuladaAno,
+                'VendaAlcancadaAno' => $fat->VendaAlcancadaAno,
+                'VendaAno' => $fat->VendaAno,
+                'PerformanceAno' => $fat->PerformanceAno,
+                'DiferencaAno' => $fat->DiferencaAno,
+            ];
+        }
+        TVFaturamento::where('id', '>', 0)->truncate();
+        TVFaturamento::insert($faturamento);
+
+        // Inserção de dados gráfico serviços***************************
+
+        foreach ($DLTVEvolucao as $ev) {
+            $evolucao[] = [
+                'Atualizacao' => Carbon::createFromFormat("d/m/Y H:i:s", $ev->Atualizacao)->format("Y-m-d H:i:s"),
+                'DiaSemana' => $ev->DiaSemana,
+                'Venda' => $ev->Venda,
+                'Meta' => $ev->Meta
+            ];
+        }
+        TVEvolucao::where('id', '>', 0)->truncate();
+        TVEvolucao::insert($evolucao);
+    }
+
 
     /**
      * Operação de insercaao de dados no DB
      */
     public function insertData()
     {
-        $this->relResumos();
+        //$this->relResumos();
         $this->relFaturamentoLojas();
-        $this->relServicosLojas();
+        //$this->relServicosLojas();
         $this->relComprasLojas();
         $this->analiseCreditoLojas();
+        $this->relGerencialFiliais();
         $this->relGerencial();
+        $this->filiaisAtivas();
+        $this->appTVLojas();
     }
 
     public function messageError()
@@ -1169,206 +1441,266 @@ class HomeController extends Controller
         echo '╚══════════════════════════════════════════╝' . PHP_EOL;
         echo "\033[39m";
     }
+	
+	// Rotas API Gerencial filial
+    
+    public function getLGERFilialFatuDia($filial)
+    {
+        $fatudia = LGERFilialFatuDia::where('FilialId', $filial)->get();
+        return json_encode($fatudia, JSON_NUMERIC_CHECK);
+    }
+	
+	public function getLGERFilialFatuTotal($filial)
+    {
+        $fatutotal = LGERFilialFatuTotal::where('FilialId', $filial)->get();
+        return json_encode($fatutotal, JSON_NUMERIC_CHECK);
+    }
+
+	public function getLGERFilialGrafico($filial)
+	{
+		$fatugrafico = LGERFilialGrafico::where('FilialId', $filial)->get();
+		return json_encode($fatugrafico, JSON_NUMERIC_CHECK);
+	}
+
+	public function getLGERFilialAssoc($filial)
+	{
+		$fatuassoc = LGERFilialAssoc::where('FilialId', $filial)->get();
+		return json_encode($fatuassoc, JSON_NUMERIC_CHECK);
+	}
+
+	public function getLGERFilialTotalAssoc($filial)
+	{
+		$fatuassoc = LGERFilialTotalAssoc::where('FilialId', $filial)->get();
+		return json_encode($fatuassoc, JSON_NUMERIC_CHECK);
+	}
+
+	public function getLGERFilialMes($filial)
+	{
+		$fatumes = LGERFilialMes::where('FilialId', $filial)->get();
+		return json_encode($fatumes, JSON_NUMERIC_CHECK);
+	}
+
+    // Rotas API App TV
+    public function getTVFaturamento()
+    {
+        $faturamento = TVFaturamento::get();
+        return json_encode($faturamento, JSON_NUMERIC_CHECK);
+    }
+
+    public function getTVEvolucao()
+    {
+        $evolucao = TVEvolucao::get();
+        return json_encode($evolucao, JSON_NUMERIC_CHECK);
+    }
 
     // Rotas API Resumos ***********************
-    public function getAllFiliais()
+    public function getFiliaisAtivas()
     {
-        $filiais = Filial::orderByDesc('id_filial')->get();
-        return json_encode($filiais);
+        $filiais = FiliaisAtivas::get();
+        return json_encode($filiais, JSON_NUMERIC_CHECK);
     }
-    public function getAllAssociacao()
+
+    public function getAllFiliais($date)
     {
-        $associacao = Assoc::orderByDesc('id_assoc')->get();
-        return json_encode($associacao);
+        $filiais = Filial::whereDate('Atualizacao', $date)->get();
+        return json_encode($filiais, JSON_NUMERIC_CHECK);
     }
-    public function getAllExportacao()
+
+    public function getAllAssociacao($date)
     {
-        $exportacao = Export::orderByDesc('id_exp')->get();
-        return json_encode($exportacao);
+        $associacao = Assoc::whereDate('Atualizacao', $date)->get();
+        return json_encode($associacao, JSON_NUMERIC_CHECK);
     }
-    public function getAllTotais()
+
+    public function getAllExportacao($date)
     {
-        $totais = Total::orderByDesc('id_total')->get();
-        return json_encode($totais);
+        $exportacao = Export::whereDate('Atualizacao', $date)->get();
+        return json_encode($exportacao, JSON_NUMERIC_CHECK);
+    }
+
+    public function getAllTotais($date)
+    {
+        $totais = Total::whereDate('Atualizacao', $date)->get();
+        return json_encode($totais, JSON_NUMERIC_CHECK);
     }
 
     // Rotas API Vendas Lojas ************************
-    public function getAllRelFatuLojas()
+    public function getAllRelFatuLojas($date)
     {
-        $fatu = RelFatuLojas::orderByDesc('id_faturamento')->get();
-        return json_encode($fatu);
+        $fatu = RelFatuLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($fatu, JSON_NUMERIC_CHECK);
     }
-    public function getAllRelGrafVenLojas()
+
+    public function getAllRelGrafVenLojas($date)
     {
-        $graf = RelGrafVenLojas::orderByDesc('id_grafico')->get();
-        return json_encode($graf);
+        $graf = RelGrafVenLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($graf, JSON_NUMERIC_CHECK);
     }
-    public function getAllRelPerfAssocVenLojas()
+
+    public function getAllRelPerfAssocVenLojas($date)
     {
-        $perfassoc = RelPerfAssocVenLojas::orderByDesc('id_assoc')->get();
-        return json_encode($perfassoc);
+        $perfassoc = RelPerfAssocVenLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($perfassoc, JSON_NUMERIC_CHECK);
     }
-    public function getAllRelPerfMesVenLojas()
+
+    public function getAllRelPerfMesVenLojas($date)
     {
-        $perfmes = RelPerfMesVenLojas::orderByDesc('id_mes')->get();
-        return json_encode($perfmes);
+        $perfmes = RelPerfMesVenLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($perfmes, JSON_NUMERIC_CHECK);
     }
-    public function getAllRelTotFatLojas()
+
+    public function getAllRelTotFatLojas($date)
     {
-        $totfatu = RelTotFatLojas::orderByDesc('id_faturamento')->get();
-        return json_encode($totfatu);
+        $totfatu = RelTotFatLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($totfatu, JSON_NUMERIC_CHECK);
     }
-    public function getAllRelTotPerfVenLojas()
+
+    public function getAllRelTotPerfVenLojas($date)
     {
-        $totperf = RelTotPerfVenLojas::orderByDesc('id_total')->get();
-        return json_encode($totperf);
+        $totperf = RelTotPerfVenLojas::whereDate('Atualizacao', $date)->get();
+        return json_encode($totperf, JSON_NUMERIC_CHECK);
     }
 
     // Rotas API Servicos Solar ******************
-    public function getLSerGrafico()
+    public function getLSerGrafico($date)
     {
-        $sgrafico = LSerGrafico::orderByDesc('id_grafico')->get();
-        return json_encode($sgrafico);
+        $sgrafico = LSerGrafico::whereDate('Atualizacao', $date)->get();
+        return json_encode($sgrafico, JSON_NUMERIC_CHECK);
     }
-    public function getLSerPerform()
+    public function getLSerPerform($date)
     {
-        $sperf = LSerPerform::orderByDesc('id_perform')->get();
-        return json_encode($sperf);
+        $sperf = LSerPerform::whereDate('Atualizacao', $date)->get();
+        return json_encode($sperf, JSON_NUMERIC_CHECK);
     }
-    public function getLSerResumoDia()
+    public function getLSerResumoDia($date)
     {
-        $sresu = LSerResumoDia::orderByDesc('id_resumdia')->get();
-        return json_encode($sresu);
+        $sresu = LSerResumoDia::whereDate('Atualizacao', $date)->get();
+        return json_encode($sresu, JSON_NUMERIC_CHECK);
     }
-    public function getLSerTotais()
+    public function getLSerTotais($date)
     {
-        $stotais = LSerTotais::orderByDesc('id_total')->get();
-        return json_encode($stotais);
+        $stotais = LSerTotais::whereDate('Atualizacao', $date)->get();
+        return json_encode($stotais, JSON_NUMERIC_CHECK);
     }
 
     // Rotas API Compras Solar *******************
-    public function getLComComparadia()
+    public function getLComComparadia($date)
     {
-        $ccomp = LComComparadia::orderByDesc('id_comp')->get();
-        return json_encode($ccomp);
+        $ccomp = LComComparadia::whereDate('Atualizacao', $date)->get();
+        return json_encode($ccomp, JSON_NUMERIC_CHECK);
     }
-    public function getLComGrafico()
+    public function getLComGrafico($date)
     {
-        $cgrafico = LComGrafico::orderByDesc('id_grafico')->get();
-        return json_encode($cgrafico);
+        $cgrafico = LComGrafico::whereDate('Atualizacao', $date)->get();
+        return json_encode($cgrafico, JSON_NUMERIC_CHECK);
     }
-    public function getLComPerfAssoc()
+    public function getLComPerfAssoc($date)
     {
-        $cassoc = LComPerfAssoc::orderByDesc('id_assoc')->get();
-        return json_encode($cassoc);
+        $cassoc = LComPerfAssoc::whereDate('Atualizacao', $date)->get();
+        return json_encode($cassoc, JSON_NUMERIC_CHECK);
     }
-    public function getLComPerfMes()
+    public function getLComPerfMes($date)
     {
-        $cmes = LComPerfMes::orderByDesc('id_mes')->get();
-        return json_encode($cmes);
+        $cmes = LComPerfMes::whereDate('Atualizacao', $date)->get();
+        return json_encode($cmes, JSON_NUMERIC_CHECK);
     }
-    public function getLComTotais()
+    public function getLComTotais($date)
     {
-        $ctotais = LComTotais::orderByDesc('id_total')->get();
-        return json_encode($ctotais);
+        $ctotais = LComTotais::whereDate('Atualizacao', $date)->get();
+        return json_encode($ctotais, JSON_NUMERIC_CHECK);
     }
 
     // Rotas API Análise de Crediario por Filial
-    public function getLAcrKpis()
+    public function getLAcrKpis($filial)
     {
-        $lkpis = LAcredKpis::orderByDesc('uid')->get();
-        return json_encode($lkpis);
+        if ($filial > 0) :
+            $lkpis = LAcredKpis::where('CodFilial', $filial)->get();
+        else :
+            $lkpis = LAcredKpis::get();
+        endif;
+
+        return json_encode($lkpis, JSON_NUMERIC_CHECK);
     }
 
-    public function getLAcrGrafVencidos()
+    public function getLAcrGrafVencidos($filial)
     {
-        $lvencidos = LAcredVencido::orderByDesc('uid')->get();
-        return json_encode($lvencidos);
+        $lvencidos = LAcredVencido::where('CodFilial', $filial)->get();
+        return json_encode($lvencidos, JSON_NUMERIC_CHECK);
     }
 
-    public function getLAcrGrafProjecao()
+    public function getLAcrGrafProjecao($filial)
     {
-        $lprojecao = LAcredProjecao::orderByDesc('uid')->get();
-        return json_encode($lprojecao);
+        $lprojecao = LAcredProjecao::where('CodFilial', $filial)->get();
+        return json_encode($lprojecao, JSON_NUMERIC_CHECK);
     }
 
     // Rotas API Análise de Crediario Totais
     public function getLAcrKpisTotal()
     {
         $lkpist = LAcredKpisTotal::orderByDesc('uid')->get();
-        return json_encode($lkpist);
+        return json_encode($lkpist, JSON_NUMERIC_CHECK);
     }
 
     public function getLAcrGrafVencidosTotal()
     {
         $lvencidost = LAcredVencidoTotal::orderByDesc('uid')->get();
-        return json_encode($lvencidost);
+        return json_encode($lvencidost, JSON_NUMERIC_CHECK);
     }
 
     public function getLAcrGrafProjecaoTotal()
     {
         $lprojecaot = LAcredProjecaoTotal::orderByDesc('uid')->get();
-        return json_encode($lprojecaot);
+        return json_encode($lprojecaot, JSON_NUMERIC_CHECK);
     }
 
     // Rotas Gerencial
-    public function getLGERAnaliseFiliais()
+    public function getLGERAnaliseFiliais($filial)
     {
-        $lkpisa = LGERAnaliseFiliais::orderByDesc('uid')->get();
-        return json_encode($lkpisa);
+        $lkpisa = LGERAnaliseFiliais::where('CodFilial', $filial)->get();
+        return json_encode($lkpisa, JSON_NUMERIC_CHECK);
     }
 
     public function getLGERConversaoFiliais()
     {
         $lvencidosc = LGERConversaoFiliais::orderByDesc('uid')->get();
-        return json_encode($lvencidosc);
+        return json_encode($lvencidosc, JSON_NUMERIC_CHECK);
     }
 
-    public function getLGERGiroEstoque()
+    public function getLGERGiroEstoque($filial)
     {
-        $lgiro = LGERGiroEstoque::orderByDesc('uid')->get();
-        return json_encode($lgiro);
+        $lgiro = LGERGiroEstoque::where('CodFilial', $filial)->get();
+        return json_encode($lgiro, JSON_NUMERIC_CHECK);
     }
 
-    public function getLGERInadimplencia()
+    public function getLGERInadimplencia($filial)
     {
-        $lprojecaoi = LGERInadimplencia::orderByDesc('uid')->get();
-        return json_encode($lprojecaoi);
+        $lprojecaoi = LGERInadimplencia::where('CodFilial', $filial)->get();
+        return json_encode($lprojecaoi, JSON_NUMERIC_CHECK);
     }
 
-    public function getLGERAnaliseVendedores()
+    public function getLGERAnaliseVendedores($filial)
     {
-        $lkpisa = LGERAnaliseVendedores::orderByDesc('uid')->get();
-        return json_encode($lkpisa);
+        $lkpisa = LGERAnaliseVendedores::where('CodFilial', $filial)->get();
+        return json_encode($lkpisa, JSON_NUMERIC_CHECK);
     }
 
-    public function getLGERConversaoVendedores()
+    public function getLGERConversaoVendedores($filial)
     {
-        $lvencidosc = LGERConversaoVendedores::orderByDesc('uid')->get();
-        return json_encode($lvencidosc);
+        $lvencidosc = LGERConversaoVendedores::where('CodFilial', $filial)->get();
+        return json_encode($lvencidosc, JSON_NUMERIC_CHECK);
     }
 
-    public function getLGERGiroSubGrupo(Request $request)
+    public function getLGERGiroSubGrupo($filial)
     {
-        // $filial = $request->filial;
-        // $subgrupo = $request->subgrupo;
-        // $giro = $request->giro;
-        // $lgirosubgrupo = LGERGiroSubGrupo::query()
-        // ->when($filial, function($query){
-        //     $query->where('Filial', $filial)
-        // })
-        // ->when($filial, function($query){
-        //     $query->where('Filial', $filial)
-        // })
-        // ->when($filial, function($query){
-        //     $query->where('Filial', $filial)
-        // })
-        // ->get()
-
-        $lgirosubgrupo = LGERGiroSubGrupo::orderByDesc('uid')->get();
-        return json_encode($lgirosubgrupo);
+        $lgirosubgrupo = LGERGiroSubGrupo::where('CodFilial', $filial)->get();
+        return json_encode($lgirosubgrupo, JSON_NUMERIC_CHECK);
     }
 
+    public function getLGERMargemVendedor($filial)
+    {
+        $lmargemv = LGERMargemVendedor::where('CodFilial', $filial)->get();
+        return json_encode($lmargemv, JSON_NUMERIC_CHECK);
+    }
     // Rotas API Usuários ************************
     public function listUsers()
     {
@@ -1376,16 +1708,11 @@ class HomeController extends Controller
         return response()->json($usuarios);
     }
 
-    public function listUsersAccess()
+    public function listUsersAccess(Request $request)
     {
-        $access = UserAccess::with('usuario')->get();
+        $idfilial = $request->IdFilial;
+        $access = UserAccess::where("IdFilial", $idfilial)->with('usuario')->get();
         return response()->json($access);
-    }
-
-    public function getLGERMargemVendedor()
-    {
-        $lmargemv = LGERMargemVendedor::orderByDesc('uid')->get();
-        return json_encode($lmargemv);
     }
 
     public function login(LoginRequest $request, User $usuario)
@@ -1416,11 +1743,13 @@ class HomeController extends Controller
                         "filial" => $code->Filial,
                         "type" => $code->Type,
                         "code" => $code->Code,
+                        "rule" => $code->Rule,
                         "token" => $token->plainTextToken
                     ]
                 ]
             ];
             $data = [
+                "IdFilial" => $code->Filial,
                 "IdUsuario" => $code->IdUsuario,
                 "Ip" => $request->ip()
             ];

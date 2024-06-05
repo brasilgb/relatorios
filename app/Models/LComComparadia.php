@@ -18,6 +18,7 @@ class LComComparadia extends Model
          'CompraAnterior',
          'CompraSemana',
          'CompraMes',
+         'ColorRep',
          'Rep',
          'PrazoMedio'
         ];

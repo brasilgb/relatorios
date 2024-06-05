@@ -38,8 +38,14 @@ class CallDatabase extends Command
     public function handle()
     {
         //return Command::SUCCESS;
-        $controller = app()->make('App\Http\Controllers\HomeController');
-        app()->call([$controller, 'insertData']);
+        $Lojacontroller = app()->make('App\Http\Controllers\HomeController');
+        app()->call([$Lojacontroller, 'insertData']);
+        
+        $Naturcontroller = app()->make('App\Http\Controllers\NaturovosController');
+        app()->call([$Naturcontroller, 'insertData']);
+
+        $Supercontroller = app()->make('App\Http\Controllers\SupermercadosController');
+        app()->call([$Supercontroller, 'insertData']);
         return;
     }
 }

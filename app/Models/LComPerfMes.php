@@ -14,6 +14,7 @@ class LComPerfMes extends Model
     protected $fillable = [
         'Atualizacao',
         'MesAno',
+        'ColorMedia',
         'MediaCompra',
         'Rep',
         'PrazoMedio'

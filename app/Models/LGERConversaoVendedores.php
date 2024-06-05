@@ -13,14 +13,8 @@ class LGERConversaoVendedores extends Model
 
     protected $fillable = [
         'Atualizacao',
-        'CodigoFilial',
+        'CodFilial',
         'DescricaoFilial',
-        'CodigoVendedorGE',
-        'RotuloMelhorGE',
-        'ValorMelhorGE',
-        'CodigoVendedorPP',
-        'RotuloMelhorPP',
-        'ValorMelhorPP',
         'CodigoVendedorVenda',
         'RotuloMelhorVenda',
         'ValorMelhorVenda',
